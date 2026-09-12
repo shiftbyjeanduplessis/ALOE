@@ -17,7 +17,7 @@ jobs:
           cp perfect-women-start-here/index.html public/index.html
           for f in perfect-women-start-here/asset_sources/*.b64; do
             name=$(basename "$f" .b64)
-            base64 -d "$f" > "public/assets/$name" || true
+            base64 -d -i "$f" > "public/assets/$name" || true
           done
       - name: Install Playwright
         run: |
@@ -27,7 +27,7 @@ jobs:
       - name: Capture Start Here and app
         run: |
           python3 -m http.server 4173 --directory public >/tmp/pw-http.log 2>&1 &
-          cat > /tmp/inspect.js <<'NODE'
+          cat > inspect.js <<'NODE'
           const { chromium } = require('playwright');
           const fs = require('fs');
           (async()=>{
@@ -44,11 +44,12 @@ jobs:
                 title:document.title,
                 width:document.documentElement.scrollWidth,
                 innerWidth:innerWidth,
-                bodyText:document.body.innerText.slice(0,1200),
+                bodyText:document.body.innerText.slice(0,1800),
                 bg:getComputedStyle(document.body).backgroundColor,
-                app:!!document.querySelector('.shell'),
+                shell:!!document.querySelector('.shell'),
                 nav:!!document.querySelector('.nav'),
-                hero:!!document.querySelector('.hero')
+                hero:!!document.querySelector('.hero'),
+                homeText:(document.querySelector('#home')||{}).innerText||''
               }));
               results.push({name,status:response&&response.status(),errors,metrics});
               await page.close();
@@ -64,7 +65,7 @@ jobs:
             await browser.close();
           })();
           NODE
-          node /tmp/inspect.js
+          node inspect.js
       - name: Upload visual inspection
         if: always()
         uses: actions/upload-artifact@v4
