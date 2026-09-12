@@ -1,0 +1,36 @@
+name: Perfect Women build UI v3
+
+on:
+  push:
+    branches: [perfect-women-ui-v2]
+    paths:
+      - 'perfect-women-start-here/dev_sources/**'
+      - '.github/workflows/perfect-women-build-ui-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perfect-women-ui-v2
+      - name: Validate JS
+        run: node --check perfect-women-start-here/dev_sources/pw-ui-v3.part7.js
+      - name: Encode deploy assets
+        run: |
+          base64 -w0 perfect-women-start-here/dev_sources/pw-ui-v3.part7.js > perfect-women-start-here/asset_sources/pw-ui-v3.part7.b64
+          base64 -w0 perfect-women-start-here/dev_sources/pw-ui-v3.css > perfect-women-start-here/asset_sources/pw-ui-v3.css.b64
+          base64 -w0 perfect-women-start-here/dev_sources/app-page-v3.html > perfect-women-start-here/asset_sources/app-page.html.b64
+          base64 -w0 perfect-women-start-here/dev_sources/sw-v3.js > perfect-women-start-here/asset_sources/sw.js.b64
+      - name: Commit generated assets
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perfect-women-start-here/asset_sources/pw-ui-v3.part7.b64 perfect-women-start-here/asset_sources/pw-ui-v3.css.b64 perfect-women-start-here/asset_sources/app-page.html.b64 perfect-women-start-here/asset_sources/sw.js.b64
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Build Perfect Women UI v3 assets'
+          git push origin HEAD:perfect-women-ui-v2
