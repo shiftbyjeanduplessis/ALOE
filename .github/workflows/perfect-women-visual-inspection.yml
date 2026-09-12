@@ -30,7 +30,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install --with-deps chromium
-      - name: Capture Start Here and all app screens
+      - name: Capture Start Here, app screens and QA time machine
         run: |
           python3 -m http.server 4173 --directory public >/tmp/pw-http.log 2>&1 &
           cat > inspect.js <<'NODE'
@@ -50,7 +50,7 @@ jobs:
             }
             async function snap(name,page,errors,status=200){
               await page.screenshot({path:`artifacts/${name}.png`,fullPage:true});
-              const metrics=await page.evaluate(()=>({title:document.title,width:document.documentElement.scrollWidth,innerWidth:innerWidth,screen:[...document.querySelectorAll('.screen')].find(x=>getComputedStyle(x).display!=='none')?.id||'',bodyText:document.body.innerText.slice(0,2600),bg:getComputedStyle(document.body).backgroundColor,shell:!!document.querySelector('.shell'),nav:!!document.querySelector('.nav'),hero:!!document.querySelector('.hero')}));
+              const metrics=await page.evaluate(()=>({title:document.title,width:document.documentElement.scrollWidth,innerWidth:innerWidth,screen:[...document.querySelectorAll('.screen')].find(x=>getComputedStyle(x).display!=='none')?.id||'',bodyText:document.body.innerText.slice(0,3000),bg:getComputedStyle(document.body).backgroundColor,shell:!!document.querySelector('.shell'),nav:!!document.querySelector('.nav'),hero:!!document.querySelector('.hero'),qa:!!document.querySelector('#pwQaPanel')}));
               results.push({name,status,errors:[...errors],metrics});
             }
             async function simple(name,url,viewport){
@@ -66,14 +66,6 @@ jobs:
               await page.locator('[data-screen="exercise"]').click();
               await page.waitForTimeout(100);
               await snap('app-mobile-exercise',page,errors);
-              const choose=page.locator('#exercise [data-choose-track]:visible').first();
-              if(await choose.count()){
-                await choose.click();
-                await page.waitForTimeout(100);
-                await snap('app-mobile-exercise-chooser',page,errors);
-                const close=page.locator('#modal .close:visible').first();
-                if(await close.count()) await close.click();
-              }
               await page.locator('[data-screen="diary"]').click();
               await page.waitForTimeout(100);
               await snap('app-mobile-diary',page,errors);
@@ -82,10 +74,42 @@ jobs:
               await snap('app-mobile-progress',page,errors);
               await context.close();
             }
+            async function qaTour(){
+              const {context,page,errors}=await basePage({width:390,height:844});
+              const response=await page.goto('http://127.0.0.1:4173/assets/app-page.html?cohort=2026-09-14&qa=1',{waitUntil:'networkidle',timeout:30000});
+              await page.locator('#pwQaPanel').waitFor({state:'attached'});
+              await page.locator('#qatab').click();
+              await page.locator('#qatr').selectOption('gym');
+              await page.locator('#qaw').selectOption('1');
+              await page.locator('#qad').selectOption('1');
+              await page.locator('#qaex').click();
+              await page.waitForTimeout(100);
+              let body=await page.locator('body').innerText();
+              if(!body.includes('Basic Gym')) throw new Error('QA Basic Gym selection did not render');
+              await snap('qa-week1-basic-gym',page,errors,response&&response.status());
+              await page.locator('#qatr').selectOption('home');
+              await page.locator('#qanx').click();
+              await page.waitForTimeout(100);
+              body=await page.locator('body').innerText();
+              if(!body.includes('Home Dumbbell')) throw new Error('QA Home Dumbbell cycle did not render');
+              await snap('qa-next-home-workout',page,errors);
+              await page.locator('#qatr').selectOption('run');
+              await page.locator('#qaw').selectOption('8');
+              await page.locator('#qad').selectOption('2');
+              await page.waitForTimeout(100);
+              body=await page.locator('body').innerText();
+              if(!body.includes('Walking & Running')) throw new Error('QA Walking & Running selection did not render');
+              await snap('qa-week8-walking-running',page,errors);
+              await page.locator('#qalaunch').click();
+              await page.waitForTimeout(100);
+              await snap('qa-sunday-launch',page,errors);
+              await context.close();
+            }
             await simple('start-desktop','http://127.0.0.1:4173/',{width:1365,height:768});
             await simple('start-mobile','http://127.0.0.1:4173/',{width:390,height:844});
             await simple('app-desktop-home','http://127.0.0.1:4173/assets/app-page.html?cohort=2026-09-14',{width:1365,height:768});
             await appTour();
+            await qaTour();
             fs.writeFileSync('artifacts/inspection.json',JSON.stringify(results,null,2));
             console.log(JSON.stringify(results,null,2));
             if(results.some(r=>r.status!==200 || r.errors.length || r.metrics.width>r.metrics.innerWidth+2 || !r.metrics.shell)) process.exitCode=1;
