@@ -11,3 +11,58 @@ renderHome=function(){oh();homePlus()};renderExercise=function(){oe();exercisePl
 function qa(){if(new URLSearchParams(location.search).get('qa')!=='1')return;const RD=window.Date;let qn=null,bk='pw8v4-qa-backup';if(!sessionStorage.getItem(bk))sessionStorage.setItem(bk,JSON.stringify(S));class QD extends RD{constructor(...a){a.length||!qn?super(...a):super(qn.getTime())}static now(){return qn?qn.getTime():RD.now()}static parse(v){return RD.parse(v)}static UTC(...a){return RD.UTC(...a)}}window.Date=QD;const p=document.createElement('aside');p.id='pwQaPanel';p.className='v3qa closed';p.innerHTML=`<button id="qatab">TEST</button><div class="qab"><header><b>Challenge preview</b><span id="qal">Real date</span></header><div class="qr"><select id="qaw"><option value="0">Prep</option>${[1,2,3,4,5,6,7,8].map(x=>`<option value="${x}">Week ${x}</option>`).join('')}</select><select id="qad">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((x,i)=>`<option value="${i+1}">${x}</option>`).join('')}</select></div><div class="qr three"><button id="qap">← DAY</button><button id="qan">DAY →</button><button id="qawp">+ WEEK</button></div><div class="qr"><select id="qatr"><option value="gym">Basic Gym</option><option value="home">Home Dumbbell</option><option value="run">Walking & Running</option></select><button id="qanx">NEXT WORKOUT</button></div><div class="qr three"><button id="qaprep">PREP</button><button id="qalaunch">SUN 8PM</button><button id="qaex">EXERCISE</button></div><div class="qr"><button id="qareal">REAL DATE</button><button id="qares" class="danger">RESTORE + EXIT</button></div></div>`;document.body.appendChild(p);const W=p.querySelector('#qaw'),D=p.querySelector('#qad'),T=p.querySelector('#qatr');T.value=S.track||'gym';const base=()=>new RD(S.cohort+'T12:00:00+02:00');function wd(){if(!qn){const now=new RD(),x=Math.floor((now-base())/86400000);return x<0?{w:0,d:1}:{w:Math.min(8,Math.floor(x/7)+1),d:(x%7)+1}}const x=Math.floor((qn-base())/86400000);return x<0?{w:0,d:1}:{w:Math.min(8,Math.floor(x/7)+1),d:(x%7)+1}}function ref(){const s=active();renderAll();show(s);const x=wd();W.value=x.w;D.value=x.d;D.disabled=x.w===0;T.value=S.track||'gym';p.querySelector('#qal').textContent=qn?new Intl.DateTimeFormat('en-ZA',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Africa/Johannesburg'}).format(qn):'Real date'}function set(w,d){qn=w===0?new RD(base().getTime()-86400000):new RD(base().getTime()+(((w-1)*7)+(d-1))*86400000);ref()}function move(n){qn=new RD((qn||new RD()).getTime()+n*86400000);ref()}function nx(){S.track=S.track||'gym';const t=tracks[S.track];let x=qn?new RD(qn):new RD(base().getTime()-86400000);for(let i=0;i<16;i++){x=new RD(x.getTime()+86400000);if(t.days[x.getDay()]){qn=x;ref();show('exercise');break}}}p.querySelector('#qatab').onclick=()=>p.classList.toggle('closed');W.onchange=()=>set(+W.value,+D.value||1);D.onchange=()=>set(+W.value,+D.value);T.onchange=()=>{S.track=T.value;save();ref();show('exercise')};p.querySelector('#qap').onclick=()=>move(-1);p.querySelector('#qan').onclick=()=>move(1);p.querySelector('#qawp').onclick=()=>move(7);p.querySelector('#qanx').onclick=nx;p.querySelector('#qaprep').onclick=()=>set(0,1);p.querySelector('#qalaunch').onclick=()=>{qn=new RD(base().getTime()-16*3600000);ref();show('home')};p.querySelector('#qaex').onclick=()=>show('exercise');p.querySelector('#qareal').onclick=()=>{qn=null;ref()};p.querySelector('#qares').onclick=()=>{try{const b=JSON.parse(sessionStorage.getItem(bk)||'{}');Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,b);save();sessionStorage.removeItem(bk)}catch(e){}window.Date=RD;location.href=location.pathname};ref()}
 renderAll();qa()
 })();
+
+(function(){
+  const p=document.getElementById('pwQaPanel');
+  if(!p||p.dataset.planCycle==='1')return;
+  p.dataset.planCycle='1';
+  const q=p.querySelector('.qab');
+  const h=q&&q.querySelector('header');
+  const T=p.querySelector('#qatr');
+  if(!q||!h||!T)return;
+
+  const style=document.createElement('style');
+  style.id='pwQaPlanCycleStyles';
+  style.textContent=`
+    .pw-qa-plan-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+    .pw-qa-plan-row button{min-height:40px;border:1px solid #d8ecee;border-radius:10px;background:#f8fdfd;color:#075568;font-size:9px;font-weight:900;line-height:1.15;padding:7px 5px}
+    .pw-qa-plan-row button.on{background:#ffd62e;border-color:#ffd62e;color:#075568;box-shadow:0 0 0 2px rgba(255,214,46,.18)}
+    .pw-qa-plan-note{margin:6px 1px 1px;color:#6a8388;font-size:8px;line-height:1.25}
+    body.pw-qa-expanded .content{padding-bottom:390px!important}
+    body.pw-qa-expanded #exercise .v3plans{position:relative;z-index:1}
+    @media(max-width:420px){body.pw-qa-expanded .content{padding-bottom:420px!important}.v3qa{max-height:58vh}.v3qa .qab{max-height:58vh;overflow:auto}}
+  `;
+  document.head.appendChild(style);
+
+  const row=document.createElement('div');
+  row.className='pw-qa-plan-row';
+  row.innerHTML=`<button type="button" data-qa-plan="gym">BASIC<br>GYM</button><button type="button" data-qa-plan="home">HOME<br>DUMBBELL</button><button type="button" data-qa-plan="run">WALK +<br>RUN</button>`;
+  h.insertAdjacentElement('afterend',row);
+  const note=document.createElement('div');
+  note.className='pw-qa-plan-note';
+  note.textContent='All current app training tracks are shown here. Tap any plan, then change Week / Day or use NEXT WORKOUT.';
+  row.insertAdjacentElement('afterend',note);
+
+  function syncPlans(){
+    row.querySelectorAll('[data-qa-plan]').forEach(b=>b.classList.toggle('on',b.dataset.qaPlan===S.track));
+  }
+  function choose(k){
+    S.track=k;
+    save();
+    T.value=k;
+    renderAll();
+    show('exercise');
+    syncPlans();
+    if(typeof toast==='function')toast((META[k]?.n||'Exercise plan')+' selected');
+  }
+  row.querySelectorAll('[data-qa-plan]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.qaPlan)));
+  T.addEventListener('change',()=>requestAnimationFrame(syncPlans));
+
+  const tab=p.querySelector('#qatab');
+  function syncOpen(){
+    document.body.classList.toggle('pw-qa-expanded',!p.classList.contains('closed'));
+    syncPlans();
+  }
+  tab&&tab.addEventListener('click',()=>requestAnimationFrame(syncOpen));
+  syncOpen();
+})();
