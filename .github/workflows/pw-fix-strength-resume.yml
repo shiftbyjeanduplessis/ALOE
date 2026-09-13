@@ -1,0 +1,32 @@
+name: Perfect Women fix strength resume
+
+on:
+  push:
+    branches: [perfect-women-start-here]
+    paths:
+      - 'scripts/pw_fix_strength_resume.py'
+      - '.github/workflows/pw-fix-strength-resume.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perfect-women-start-here
+      - name: Apply resume fix
+        run: python scripts/pw_fix_strength_resume.py
+      - name: Syntax check
+        run: node --check perfect-women-start-here/dev_sources/pw-training-sequence-v5.js
+      - name: Commit resume fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perfect-women-start-here/dev_sources/pw-training-sequence-v5.js perfect-women-start-here/asset_sources/pw-training-sequence-v5.b64 perfect-women-start-here/dev_sources/sw-v3.js perfect-women-start-here/asset_sources/sw.js.b64
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Resume strength workout on active exercise'
+          git push origin HEAD:perfect-women-start-here
