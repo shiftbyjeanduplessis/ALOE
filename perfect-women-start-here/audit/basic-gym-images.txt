@@ -1,0 +1,14 @@
+page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio
+--------------------------------------------------------------------------------------------
+   1     0 image    1323  1871  rgb     3   8  image  no         3  0   160   160 3486K  48%
+   2     1 image    1323  1871  rgb     3   8  image  no         5  0   160   160  129K 1.8%
+   3     2 image    1323  1871  rgb     3   8  image  no         7  0   160   160  151K 2.1%
+   4     3 image    1323  1871  rgb     3   8  image  no         9  0   160   160  127K 1.7%
+   5     4 image    1323  1871  rgb     3   8  image  no        11  0   160   160  145K 2.0%
+   6     5 image    1323  1871  rgb     3   8  image  no        13  0   160   160  148K 2.0%
+   7     6 image    1323  1871  rgb     3   8  image  no        15  0   160   160  156K 2.1%
+   8     7 image    1323  1871  rgb     3   8  image  no        17  0   160   160  168K 2.3%
+   9     8 image    1323  1871  rgb     3   8  image  no        19  0   160   160  168K 2.3%
+  10     9 image    1323  1871  rgb     3   8  image  no        21  0   160   160  138K 1.9%
+  11    10 image    1323  1871  rgb     3   8  image  no        23  0   160   160 4164K  57%
+  12    11 image    1323  1871  rgb     3   8  image  no        25  0   160   160 1656K  23%
