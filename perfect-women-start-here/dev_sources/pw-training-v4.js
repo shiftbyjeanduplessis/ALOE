@@ -50,12 +50,12 @@ function markMove(){S.days=S.days||{};S.days[key()]=S.days[key()]||{};S.days[key
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
 function strengthWeek(track,w){
-  if(track==='gym') return w===1?{min:2,max:2,label:'2 sets × 12 reps'}:w===2?{min:2,max:3,label:'2–3 sets × 12 reps'}:{min:3,max:3,label:'3 sets × 12 reps'};
+  if(track==='gym')return w===1?{min:2,max:2,label:'2 sets × 12 reps'}:w===2?{min:2,max:3,label:'2–3 sets × 12 reps'}:{min:3,max:3,label:'3 sets × 12 reps'};
   return w<=2?{min:2,max:2,label:'2 sets'}:w<=4?{min:2,max:3,label:'2–3 sets'}:{min:3,max:3,label:'3 sets'};
 }
 function strengthSession(track,w,d){
   if(!STRENGTH[track]||!w||!d)return null;
-  let type=(d===1||d===3)?'lower':'upper';
+  const type=(d===1||d===3)?'lower':'upper';
   let name=track==='gym'?(type==='lower'?'Lower Body':'Upper Body'):(type==='lower'?'Lower Body + Core':'Upper Body');
   if(d>2)name+=' · repeat approved template';
   let ex=STRENGTH[track][type].map(x=>({...x}));
@@ -94,42 +94,39 @@ function ensureModal(){
 function stopTimers(){if(restTimer){clearInterval(restTimer);restTimer=null}if(elapsedTimer){clearInterval(elapsedTimer);elapsedTimer=null}}
 function closeTraining(){stopTimers();if(modal)modal.classList.remove('on');renderAll();show('exercise')}
 function fmtElapsed(iso){const n=Math.max(0,Math.floor((Date.now()-new Date(iso).getTime())/1000)),m=Math.floor(n/60),s=n%60;return m+':'+String(s).padStart(2,'0')}
-function startElapsed(log){
-  if(elapsedTimer)clearInterval(elapsedTimer);
-  elapsedTimer=setInterval(()=>{const e=document.getElementById('pwElapsed');if(e)e.textContent=fmtElapsed(log.startedAt)},1000)
-}
+function startElapsed(log){if(elapsedTimer)clearInterval(elapsedTimer);elapsedTimer=setInterval(()=>{const e=document.getElementById('pwElapsed');if(e)e.textContent=fmtElapsed(log.startedAt)},1000)}
 function runRest(sec){
-  restLeft=sec;if(restTimer)clearInterval(restTimer);const box=document.getElementById('pwRest');if(!box)return;
-  box.classList.add('on');
-  function paint(){const t=document.getElementById('pwRestTime');if(t)t.textContent=restLeft+'s';if(restLeft<=0){clearInterval(restTimer);restTimer=null;box.classList.add('done');setTimeout(()=>{box.classList.remove('on','done')},900)}}
+  restLeft=sec;if(restTimer)clearInterval(restTimer);const box=document.getElementById('pwRest');if(!box)return;box.classList.add('on');box.classList.remove('done');
+  function paint(){const t=document.getElementById('pwRestTime');if(t)t.textContent=restLeft+'s';if(restLeft<=0){clearInterval(restTimer);restTimer=null;box.classList.add('done');setTimeout(()=>box.classList.remove('on','done'),900)}}
   paint();restTimer=setInterval(()=>{restLeft--;paint()},1000)
 }
+function syncStrengthInputs(b,l){
+  b.querySelectorAll('.pw-set-row').forEach(row=>{const i=+row.dataset.set,weight=row.querySelector('[data-f="weight"]'),reps=row.querySelector('[data-f="reps"]');if(weight)l.exercises[activeEx].sets[i].weight=weight.value;if(reps)l.exercises[activeEx].sets[i].reps=reps.value});
+}
 function strengthModal(session){
-  const l=strengthLog(session);activeEx=Math.min(activeEx,l.exercises.length-1);const e=l.exercises[activeEx],target=session.ex[activeEx];const prev=priorExercise(session.track,e.name);const m=ensureModal(),b=m.querySelector('#pwTrainBody');m.classList.add('on');
+  stopTimers();const l=strengthLog(session);activeEx=Math.min(activeEx,l.exercises.length-1);const e=l.exercises[activeEx],target=session.ex[activeEx],prev=priorExercise(session.track,e.name),m=ensureModal(),b=m.querySelector('#pwTrainBody');m.classList.add('on');
   b.innerHTML=`<header class="pw-train-head"><button id="pwCloseTrain" aria-label="Close">×</button><div><small>WEEK ${session.w} · SESSION ${session.d}</small><b>${esc(session.name)}</b></div><span id="pwElapsed">${fmtElapsed(l.startedAt)}</span></header>
   <div class="pw-train-progress"><i style="width:${((activeEx+1)/l.exercises.length)*100}%"></i></div>
   <section class="pw-ex-card"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${l.exercises.length}</div><h1>${esc(e.name)}</h1><p>${esc(session.sets.label)} · target ${esc(target.r)}${prev?`<br><span>Last logged: ${esc(prev.weight||'—')}${target.w?' kg':''} × ${esc(prev.reps||'—')}</span>`:''}</p>
-  <div class="pw-set-head"><span>SET</span>${target.w?'<span>KG</span>':''}<span>REPS</span><span>DONE</span></div>
-  <div class="pw-set-list">${e.sets.map((s,i)=>`<div class="pw-set-row ${s.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(s.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(s.reps)}" placeholder="${esc(target.r.replace(/[^0-9–-].*$/,''))}"><button data-setdone="${i}">${s.done?'✓':'DONE'}</button></div>`).join('')}</div>
-  ${session.sets.max>e.sets.length?'<button id="pwAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}
-  </section>
+  <div class="pw-set-head ${target.w?'':'no-weight'}"><span>SET</span>${target.w?'<span>KG</span>':''}<span>REPS</span><span>DONE</span></div>
+  <div class="pw-set-list">${e.sets.map((s,i)=>`<div class="pw-set-row ${target.w?'':'no-weight'} ${s.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(s.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(s.reps)}" placeholder="reps"><button data-setdone="${i}">${s.done?'✓':'DONE'}</button></div>`).join('')}</div>
+  ${session.sets.max>e.sets.length?'<button id="pwAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}</section>
   <div class="pw-rest-choice"><span>REST BETWEEN SETS</span>${session.rest.map(x=>`<button data-rest="${x}" class="${+l.rest===x?'on':''}">${x}s</button>`).join('')}</div>
   <div id="pwRest" class="pw-rest"><span>REST</span><b id="pwRestTime">${l.rest}s</b><button id="pwRestSkip">SKIP</button><button id="pwRestPlus">+15s</button></div>
   <footer class="pw-train-nav"><button id="pwPrevEx" ${activeEx===0?'disabled':''}>← PREVIOUS</button><button id="pwNextEx" class="primary">${activeEx===l.exercises.length-1?'FINISH SESSION':'NEXT EXERCISE →'}</button></footer>`;
-  b.querySelector('#pwCloseTrain').onclick=closeTraining;
-  b.querySelectorAll('.pw-set-row input').forEach(inp=>inp.onchange=()=>{const row=inp.closest('.pw-set-row'),i=+row.dataset.set;l.exercises[activeEx].sets[i][inp.dataset.f]=inp.value;putLog(session.track,l)});
-  b.querySelectorAll('[data-setdone]').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.setdone,s=l.exercises[activeEx].sets[i];s.done=!s.done;putLog(session.track,l);if(s.done)runRest(+l.rest||session.rest[0]);strengthModal(session)});
-  const add=b.querySelector('#pwAddSet');if(add)add.onclick=()=>{l.exercises[activeEx].sets.push({weight:'',reps:'',done:false});putLog(session.track,l);strengthModal(session)};
-  b.querySelectorAll('[data-rest]').forEach(btn=>btn.onclick=()=>{l.rest=+btn.dataset.rest;putLog(session.track,l);strengthModal(session)});
+  b.querySelector('#pwCloseTrain').onclick=()=>{syncStrengthInputs(b,l);putLog(session.track,l);closeTraining()};
+  b.querySelectorAll('.pw-set-row input').forEach(inp=>inp.onchange=()=>{syncStrengthInputs(b,l);putLog(session.track,l)});
+  b.querySelectorAll('[data-setdone]').forEach(btn=>btn.onclick=()=>{syncStrengthInputs(b,l);const i=+btn.dataset.setdone,s=l.exercises[activeEx].sets[i];s.done=!s.done;putLog(session.track,l);strengthModal(session);if(s.done)requestAnimationFrame(()=>runRest(+l.rest||session.rest[0]))});
+  const add=b.querySelector('#pwAddSet');if(add)add.onclick=()=>{syncStrengthInputs(b,l);l.exercises[activeEx].sets.push({weight:'',reps:'',done:false});putLog(session.track,l);strengthModal(session)};
+  b.querySelectorAll('[data-rest]').forEach(btn=>btn.onclick=()=>{syncStrengthInputs(b,l);l.rest=+btn.dataset.rest;putLog(session.track,l);strengthModal(session)});
   b.querySelector('#pwRestSkip').onclick=()=>{if(restTimer)clearInterval(restTimer);restTimer=null;b.querySelector('#pwRest').classList.remove('on')};
-  b.querySelector('#pwRestPlus').onclick=()=>{restLeft+=15};
-  b.querySelector('#pwPrevEx').onclick=()=>{activeEx--;strengthModal(session)};
-  b.querySelector('#pwNextEx').onclick=()=>{if(activeEx<l.exercises.length-1){activeEx++;strengthModal(session)}else finishStrength(session,l)};
+  b.querySelector('#pwRestPlus').onclick=()=>{restLeft+=15;const t=b.querySelector('#pwRestTime');if(t)t.textContent=restLeft+'s'};
+  b.querySelector('#pwPrevEx').onclick=()=>{syncStrengthInputs(b,l);putLog(session.track,l);activeEx--;strengthModal(session)};
+  b.querySelector('#pwNextEx').onclick=()=>{syncStrengthInputs(b,l);putLog(session.track,l);if(activeEx<l.exercises.length-1){activeEx++;strengthModal(session)}else finishStrength(session,l)};
   startElapsed(l)
 }
 function finishStrength(session,l){
-  stopTimers();l.completed=true;l.completedAt=new Date().toISOString();l.elapsedSec=Math.max(0,Math.floor((new Date(l.completedAt)-new Date(l.startedAt))/1000));putLog(session.track,l);markMove();const b=ensureModal().querySelector('#pwTrainBody');
-  const sets=l.exercises.reduce((n,e)=>n+(e.sets||[]).filter(s=>s.done).length,0);
+  stopTimers();l.completed=true;l.completedAt=new Date().toISOString();l.elapsedSec=Math.max(0,Math.floor((new Date(l.completedAt)-new Date(l.startedAt))/1000));putLog(session.track,l);markMove();const b=ensureModal().querySelector('#pwTrainBody'),sets=l.exercises.reduce((n,e)=>n+(e.sets||[]).filter(s=>s.done).length,0);
   b.innerHTML=`<div class="pw-finish"><div class="pw-finish-check">✓</div><small>SESSION COMPLETE</small><h1>${esc(session.name)}</h1><p>${sets} sets logged · ${Math.max(1,Math.round(l.elapsedSec/60))} minutes</p><button id="pwFinishClose">BACK TO EXERCISE</button></div>`;b.querySelector('#pwFinishClose').onclick=closeTraining
 }
 
@@ -158,9 +155,7 @@ function trainingCard(){
   let html='',action=null;
   if(track==='gym'||track==='home'){
     const s=strengthSession(track,w,d),l=getLog(track);
-    if(s){
-      const done=!!(l&&l.completed);html=`<section class="pw-session-card ${done?'complete':''}"><div class="pw-session-top"><div><small>TODAY'S TRAINING</small><h2>${esc(s.name)}</h2><p>${esc(s.sets.label)} · Rest ${s.rest[0]}–${s.rest[1]} sec</p></div><span>${done?'DONE':'SESSION '+s.d}</span></div><button id="pwSessionAction">${done?'VIEW / EDIT LOG':'START SESSION'}</button></section>`;action=()=>strengthModal(s)
-    }else html='<section class="pw-session-card rest"><small>TODAY</small><h2>Rest / mobility day</h2><p>Your next strength session will appear here on the next scheduled training day.</p></section>'
+    if(s){const done=!!(l&&l.completed);html=`<section class="pw-session-card ${done?'complete':''}"><div class="pw-session-top"><div><small>TODAY'S TRAINING</small><h2>${esc(s.name)}</h2><p>${esc(s.sets.label)} · Rest ${s.rest[0]}–${s.rest[1]} sec</p></div><span>${done?'DONE':'SESSION '+s.d}</span></div><button id="pwSessionAction">${done?'VIEW / EDIT LOG':'START SESSION'}</button></section>`;action=()=>{activeEx=0;strengthModal(s)}}else html='<section class="pw-session-card rest"><small>TODAY</small><h2>Rest / mobility day</h2><p>Your next strength session will appear here on the next scheduled training day.</p></section>'
   }else if(track==='run'){
     const s=runningSession(w),l=getLog('run');if(s){const done=!!(l&&l.completed);html=`<section class="pw-session-card ${done?'complete':''}"><div class="pw-session-top"><div><small>TODAY'S WALK / RUN</small><h2>${esc(s.name)}</h2><p>${esc(s.detail)}</p></div><span>${done?'LOGGED':'SESSION '+s.d}</span></div><button id="pwSessionAction">${done?'VIEW / EDIT LOG':'LOG AFTER SESSION'}</button><div class="pw-session-hint">No live tracking needed. Do the session, then come back and record the result.</div></section>`;action=()=>runModal(s)}else html='<section class="pw-session-card rest"><small>TODAY</small><h2>Rest day</h2><p>No walking/running session is scheduled today.</p></section>'
   }
