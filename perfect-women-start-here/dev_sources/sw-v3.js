@@ -1,4 +1,4 @@
-const C='pw8-v4-7';
+const C='pw8-v4-6';
 const A=['/assets/app-page.html','/assets/pw-v4.css','/assets/pw-ui-upgrade.css','/assets/pw-ui-v3.css','/assets/pw-training-v4.css','/assets/pw-v4.part1','/assets/pw-v4.part2','/assets/pw-v4.part3','/assets/pw-v4.part4a','/assets/pw-v4.part4b','/assets/pw-v4-fix.part5','/assets/pw-v4-polish.part6','/assets/pw-ui-v3.part7','/assets/pw-training-v4','/assets/manifest.json'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
