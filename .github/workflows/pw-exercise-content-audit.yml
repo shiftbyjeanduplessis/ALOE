@@ -17,13 +17,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: perfect-women-ui-v2
-      - name: Install PDF tools
-        run: sudo apt-get update -qq && sudo apt-get install -y poppler-utils
+      - name: Install PDF and OCR tools
+        run: sudo apt-get update -qq && sudo apt-get install -y poppler-utils tesseract-ocr
       - name: Clone authoritative Perfect Women PDFs
         run: git clone --depth=1 https://github.com/shiftbyjeanduplessis/PERFECTWOMEN.git /tmp/pw-source
-      - name: Extract authoritative program text and image inventory
+      - name: Extract authoritative program text, image inventory and page OCR
         run: |
-          mkdir -p perfect-women-start-here/audit
+          set -e
+          mkdir -p perfect-women-start-here/audit/ocr/basic-gym perfect-women-start-here/audit/ocr/home-dumbbell perfect-women-start-here/audit/ocr/walking-running
           GYM='/tmp/pw-source/downloads/05 - Perfect Women - Basic Gym Program.pdf'
           HOME='/tmp/pw-source/downloads/06 - Perfect Women - Home Dumbbell Program.pdf'
           RUN='/tmp/pw-source/downloads/07 - Perfect Women - Walking and Running Program.pdf'
@@ -36,11 +37,27 @@ jobs:
           pdfinfo "$RUN" > perfect-women-start-here/audit/walking-running-info.txt
           pdftotext -layout "$RUN" perfect-women-start-here/audit/walking-running.txt
           pdfimages -list "$RUN" > perfect-women-start-here/audit/walking-running-images.txt
+          mkdir -p /tmp/gym-pages /tmp/home-pages /tmp/run-pages
+          pdftoppm -jpeg -r 180 "$GYM" /tmp/gym-pages/page >/dev/null 2>&1
+          pdftoppm -jpeg -r 180 "$HOME" /tmp/home-pages/page >/dev/null 2>&1
+          pdftoppm -jpeg -r 180 "$RUN" /tmp/run-pages/page >/dev/null 2>&1
+          for f in /tmp/gym-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/basic-gym/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
+          for f in /tmp/home-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/home-dumbbell/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
+          for f in /tmp/run-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/walking-running/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
+          {
+            for f in perfect-women-start-here/audit/ocr/basic-gym/page-*.txt; do echo "===== $(basename "$f") ====="; cat "$f"; echo; done
+          } > perfect-women-start-here/audit/basic-gym-ocr-all.txt
+          {
+            for f in perfect-women-start-here/audit/ocr/home-dumbbell/page-*.txt; do echo "===== $(basename "$f") ====="; cat "$f"; echo; done
+          } > perfect-women-start-here/audit/home-dumbbell-ocr-all.txt
+          {
+            for f in perfect-women-start-here/audit/ocr/walking-running/page-*.txt; do echo "===== $(basename "$f") ====="; cat "$f"; echo; done
+          } > perfect-women-start-here/audit/walking-running-ocr-all.txt
       - name: Commit audit text
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add perfect-women-start-here/audit
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Extract authoritative exercise program audit text'
+          git commit -m 'Extract authoritative exercise program OCR audit'
           git push origin HEAD:perfect-women-ui-v2
