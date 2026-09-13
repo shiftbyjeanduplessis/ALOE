@@ -1,0 +1,91 @@
+name: Perfect Women fix guide no-go
+
+on:
+  push:
+    branches: [perfect-women-start-here]
+    paths:
+      - '.github/workflows/pw-fix-guide-no-go.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perfect-women-start-here
+      - name: Add authoritative dynamic session guides
+        shell: bash
+        run: |
+          cat > perfect-women-start-here/dev_sources/pw-guide-fix-v1.js <<'JS'
+          (function(){
+          'use strict';
+          if(window.__PW_GUIDE_FIX_V1__)return;window.__PW_GUIDE_FIX_V1__=true;
+          const G={
+            gym:[
+              {t:'Lower Body A',x:[['Leg Press','12','Feet shoulder-width. Lower with control. Do not lock the knees.','WEIGHT'],['Goblet Squat','12','Hold one dumbbell at chest height. Sit down and back; keep chest up.','WEIGHT'],['Seated Leg Curl','12','Sit tall. Curl smoothly and squeeze the hamstrings.','WEIGHT'],['Leg Extension','12','Lift with control. Do not swing the weight.','WEIGHT'],['Hip Thrust / Glute Bridge','12','Drive hips up and squeeze the glutes at the top.','WEIGHT'],['Standing Calf Raise','12','Rise onto the toes, pause, then lower slowly.','WEIGHT']]},
+              {t:'Upper Body A',x:[['Lat Pulldown','12','Pull toward the upper chest. Drive the elbows down.','WEIGHT'],['Seated Chest Press','12','Press straight forward under control. Do not lock the elbows.','WEIGHT'],['Seated Cable Row','12','Pull the elbows back and squeeze the shoulder blades.','WEIGHT'],['Dumbbell Shoulder Press','12','Start at shoulder height. Press overhead without arching the back.','WEIGHT'],['Dumbbell Biceps Curl','12','Keep elbows close to the body. Do not swing.','WEIGHT'],['Cable Triceps Pushdown','12','Keep upper arms still and straighten the elbows under control.','WEIGHT']]},
+              {t:'Lower Body B + Core',x:[['Dumbbell Romanian Deadlift','12','Push the hips back, keep the spine long and load the hamstrings.','WEIGHT'],['Reverse Lunge','12 each','Step back under control. Push through the front foot to stand.','WEIGHT'],['Hip Abduction Machine','12','Open the knees under control. Avoid bouncing the stack.','WEIGHT'],['Hip Adduction Machine','12','Bring the legs together under control.','WEIGHT'],['Glute Kickback','12 each','Keep the pelvis stable and drive the leg back with the glute.','WEIGHT'],['Dead Bug','12 total','Extend opposite arm and leg while keeping the lower back controlled.','BODYWEIGHT'],['Standard Plank','30–45 sec','Forearms on the floor. Keep a straight line from head to heels.','TIMED']]},
+              {t:'Upper Body B + Full Body',x:[['Assisted Pull-Up OR Lat Pulldown','12','Choose the version that lets you control the full set.','WEIGHT'],['Incline Dumbbell Chest Press','12','Keep shoulder blades supported and press smoothly.','WEIGHT'],['One-Arm Dumbbell Row','12 each','Brace the torso and pull the elbow toward the hip.','WEIGHT'],['Dumbbell Lateral Raise','12','Use a light weight. Lift to about shoulder height.','WEIGHT'],['Dumbbell Squat to Press','12','Stand strongly from the squat before pressing overhead.','WEIGHT'],['Cable Biceps Curl','12','Keep elbows close and use a controlled range.','WEIGHT'],['Cable Triceps Pushdown','12','Keep upper arms still. Do not lean onto the cable.','WEIGHT']]}
+            ],
+            home:[
+              {t:'Lower Body A',x:[['Goblet Squat','8–12','Hold one dumbbell at chest height. Sit down and back, keep chest up.','WEIGHT'],['Dumbbell Romanian Deadlift','8–12','Push the hips back, keep the spine long and load the hamstrings.','WEIGHT'],['Dumbbell Glute Bridge','10–15','Drive through the heels. Squeeze the glutes at the top. Lower slowly.','WEIGHT'],['Full Dead Bug','6–10 / side','Extend opposite arm and leg slowly. Keep the lower back controlled.','BODYWEIGHT']]},
+              {t:'Upper Body A',x:[['Dumbbell Floor Press','8–12','Press straight up. Keep shoulders down. Lower until the upper arms touch the floor.','WEIGHT'],['Supported One-Arm Row','8–12 / arm','Brace on a sturdy chair. Row the dumbbell toward your hip. Lower slowly.','WEIGHT'],['Seated Shoulder Press','8–12','Sit tall. Press overhead. Keep ribs down. Control the lowering phase.','WEIGHT'],['Overhead Triceps Extension','8–12','Keep elbows pointing up. Lower behind the head. Extend fully.','WEIGHT']]},
+              {t:'Lower Body B + Core',x:[['Reverse Lunge','8–10 / leg','Step back under control. Push through the front foot to stand.','WEIGHT'],['Dumbbell Romanian Deadlift','8–12','Push the hips back. Keep the spine long and load the hamstrings.','WEIGHT'],['Sumo Squat','10–12','Take a wide stance. Sit down between the hips. Stand tall.','WEIGHT'],['Dumbbell Glute Bridge','10–15','Drive through the heels. Pause and squeeze the glutes at the top.','WEIGHT']]},
+              {t:'Upper Body B + Core',x:[['Dumbbell Floor Press','8–12','Press upward with control. Lower until the upper arms touch the floor.','WEIGHT'],['Supported One-Arm Row','8–12 / arm','Keep a flat back. Pull toward the hip. Control the lowering.','WEIGHT'],['Overhead Triceps Extension','8–12','Elbows point up. Keep the upper arms steady. Extend fully.','WEIGHT'],['Full Dead Bug','6–10 / side','Extend opposite arm and leg while keeping the lower back controlled.','BODYWEIGHT']]}
+            ]
+          };
+          const E=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m]));
+          function svg(track,s){const d=G[track]&&G[track][s-1];if(!d)return'';const rows=d.x.length,h=235+rows*112+130;let y=245;const body=d.x.map((r,i)=>{const out=`<rect x="38" y="${y}" width="924" height="94" rx="14" fill="#fff" stroke="#9bdee4"/><circle cx="72" cy="${y+32}" r="22" fill="#ff6265"/><text x="72" y="${y+39}" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">${i+1}</text><text x="108" y="${y+31}" font-size="21" font-weight="800" fill="#075568">${E(r[0])}</text><text x="108" y="${y+62}" font-size="14" fill="#163f49">${E(r[2])}</text><rect x="640" y="${y+16}" width="135" height="42" rx="10" fill="#08a8b5"/><text x="707" y="${y+43}" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">${E(r[1])}</text><rect x="793" y="${y+16}" width="150" height="42" rx="10" fill="#eafafb" stroke="#08a8b5"/><text x="868" y="${y+43}" text-anchor="middle" font-size="14" font-weight="800" fill="#075568">${E(r[3])}</text>`;y+=112;return out}).join('');return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="${h}" viewBox="0 0 1000 ${h}"><rect width="1000" height="${h}" fill="#fffaf0"/><rect x="8" y="8" width="984" height="${h-16}" rx="24" fill="none" stroke="#08a8b5" stroke-width="6"/><text x="500" y="52" text-anchor="middle" font-size="30" font-weight="900" fill="#ff5960">PERFECT WOMEN</text><rect x="415" y="66" width="170" height="34" rx="8" fill="#ffd62e"/><text x="500" y="89" text-anchor="middle" font-size="16" font-weight="800" fill="#075568">LET'S DO IT TOGETHER</text><text x="500" y="145" text-anchor="middle" font-size="38" font-weight="900" fill="#08a8b5">${E(d.t.toUpperCase())}</text><text x="500" y="182" text-anchor="middle" font-size="18" font-weight="800" fill="#ff5960">SESSION ${s} · ${rows} EXERCISES</text><rect x="38" y="202" width="924" height="34" rx="10" fill="#fff4c2" stroke="#ffd62e"/><text x="500" y="225" text-anchor="middle" font-size="14" font-weight="800" fill="#075568">FOLLOW THE APP SET PROGRESSION FOR YOUR CURRENT WEEK</text>${body}<rect x="38" y="${h-98}" width="286" height="62" rx="12" fill="#fff" stroke="#ffd62e"/><text x="55" y="${h-70}" font-size="16" font-weight="800" fill="#075568">WARM-UP</text><text x="55" y="${h-48}" font-size="14" fill="#163f49">${track==='gym'?'5 min light cardio':'3 min light cardio / mobility'}</text><rect x="357" y="${h-98}" width="286" height="62" rx="12" fill="#fff" stroke="#ff5960"/><text x="374" y="${h-70}" font-size="16" font-weight="800" fill="#075568">REST</text><text x="374" y="${h-48}" font-size="14" fill="#163f49">${track==='gym'?'60–75 sec':'45–60 sec'}</text><rect x="676" y="${h-98}" width="286" height="62" rx="12" fill="#fff" stroke="#08a8b5"/><text x="693" y="${h-70}" font-size="16" font-weight="800" fill="#075568">PROGRESS</text><text x="693" y="${h-48}" font-size="14" fill="#163f49">Use controlled form before progressing.</text></svg>`}
+          function fix(root=document){root.querySelectorAll('.pw-session-guide').forEach(d=>{if(d.dataset.fixed==='1')return;const head=d.closest('#pwSequenceBody')?.querySelector('.pw-train-head small')?.textContent||'';const m=head.match(/SESSION\s+(\d+)/i);const s=m?+m[1]:0;const track=(window.S&&S.track)||'';if(!G[track]||!s)return;const img=d.querySelector('img');if(!img)return;img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg(track,s));img.alt=(G[track][s-1].t)+' session guide';img.removeAttribute('srcset');d.dataset.fixed='1';})}
+          const mo=new MutationObserver(()=>fix());mo.observe(document.documentElement,{childList:true,subtree:true});fix();
+          })();
+          JS
+          base64 -w0 perfect-women-start-here/dev_sources/pw-guide-fix-v1.js > perfect-women-start-here/asset_sources/pw-guide-fix-v1.b64
+      - name: Wire guide fix into app
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('perfect-women-start-here/dev_sources/app-page-v3.html')
+          s=p.read_text()
+          old="'/assets/pw-training-sequence-v5']"
+          new="'/assets/pw-training-sequence-v5','/assets/pw-guide-fix-v1']"
+          if old not in s and '/assets/pw-guide-fix-v1' not in s:
+              raise SystemExit('loader anchor not found')
+          if '/assets/pw-guide-fix-v1' not in s:
+              s=s.replace(old,new)
+          p.write_text(s)
+          import base64
+          Path('perfect-women-start-here/asset_sources/app-page.html.b64').write_text(base64.b64encode(s.encode()).decode())
+          PY
+      - name: Bump service worker
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('perfect-women-start-here/dev_sources/sw-v3.js')
+          s=p.read_text().replace("const C='pw8-v5-2';","const C='pw8-v5-3';").replace("const C='pw8-v5-1';","const C='pw8-v5-3';")
+          if "'/assets/pw-guide-fix-v1'" not in s:
+              s=s.replace("'/assets/pw-training-sequence-v5',","'/assets/pw-training-sequence-v5','/assets/pw-guide-fix-v1',")
+          p.write_text(s)
+          import base64
+          Path('perfect-women-start-here/asset_sources/sw.js.b64').write_text(base64.b64encode(s.encode()).decode())
+          PY
+      - name: Static checks
+        run: |
+          node --check perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          grep -q "pw-guide-fix-v1" perfect-women-start-here/dev_sources/app-page-v3.html
+          grep -q "pw-guide-fix-v1" perfect-women-start-here/dev_sources/sw-v3.js
+          grep -q "Standard Plank','30–45 sec" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          grep -q "Full Dead Bug','6–10 / side" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perfect-women-start-here/dev_sources/pw-guide-fix-v1.js perfect-women-start-here/asset_sources/pw-guide-fix-v1.b64 perfect-women-start-here/dev_sources/app-page-v3.html perfect-women-start-here/asset_sources/app-page.html.b64 perfect-women-start-here/dev_sources/sw-v3.js perfect-women-start-here/asset_sources/sw.js.b64
+          git commit -m 'Replace inconsistent strength guides with authoritative app-aligned guides'
+          git push origin HEAD:perfect-women-start-here
