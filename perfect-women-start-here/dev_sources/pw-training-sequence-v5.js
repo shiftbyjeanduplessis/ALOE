@@ -193,7 +193,7 @@ function guidedRest(session,log,setIndex){
   restTimer=setInterval(()=>{sec--;const el=body.querySelector('#pwGuidedRestTime');if(el)el.textContent=sec+'s';if(sec<=0)finish()},1000)
 }
 function strengthModal(session){
-  stopTimers();const log=newStrengthLog(session);activeEx=Math.min(activeEx,log.exercises.length-1);const ex=log.exercises[activeEx],target=session.ex[activeEx],prev=priorExercise(session.track,ex.name,session.w,session.s),m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');const min=session.sets.min,max=session.sets.max;if(ex.sets.length>min)ex.optionalChosen=true;const needed=min+(ex.optionalChosen?1:0);strengthEnsureSets(ex,needed);let nextSet=-1;for(let i=0;i<needed;i++){if(!ex.sets[i].done){nextSet=i;break}}const complete=nextSet<0,hasOptional=max>min&&!ex.optionalChosen;const setSummary=ex.sets.slice(0,needed).map((x,i)=>`<span class="${x.done?'done':''}">SET ${i+1}${x.done?' ✓':''}</span>`).join('');
+  stopTimers();const log=newStrengthLog(session);activeEx=Math.min(activeEx,log.exercises.length-1);log.activeEx=activeEx;putSeq(session.track,session.w,session.s,log);const ex=log.exercises[activeEx],target=session.ex[activeEx],prev=priorExercise(session.track,ex.name,session.w,session.s),m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');const min=session.sets.min,max=session.sets.max;if(ex.sets.length>min)ex.optionalChosen=true;const needed=min+(ex.optionalChosen?1:0);strengthEnsureSets(ex,needed);let nextSet=-1;for(let i=0;i<needed;i++){if(!ex.sets[i].done){nextSet=i;break}}const complete=nextSet<0,hasOptional=max>min&&!ex.optionalChosen;const setSummary=ex.sets.slice(0,needed).map((x,i)=>`<span class="${x.done?'done':''}">SET ${i+1}${x.done?' ✓':''}</span>`).join('');
   const head=`<header class="pw-train-head"><button id="pwSeqClose" aria-label="Close">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span id="pwSeqElapsed">${fmtElapsed(log.startedAt)}</span></header><div class="pw-train-progress"><i style="width:${((activeEx+1)/log.exercises.length)*100}%"></i></div>${session.guide?`<details class="pw-session-guide"><summary>VIEW APPROVED SESSION GUIDE</summary><img src="${esc(session.guide)}" alt="${esc(session.name)} approved workout guide"></details>`:''}`;
   if(complete){
     const nextName=activeEx<log.exercises.length-1?session.ex[activeEx+1].n:'';body.innerHTML=head+`<section class="pw-ex-card pw-ex-complete"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${log.exercises.length}</div><div class="pw-rest-check">✓</div><h1>${esc(ex.name)} complete</h1><p class="pw-ex-cue">${esc(target.c||'')}</p><div class="pw-set-summary">${setSummary}</div>${hasOptional?`<button id="pwSeqOptional" class="pw-optional-set">+ ADD OPTIONAL SET ${min+1}</button>`:''}${nextName?`<div class="pw-next-preview"><small>NEXT EXERCISE</small><b>${esc(nextName)}</b></div>`:'<div class="pw-next-preview"><small>ALL EXERCISES COMPLETE</small><b>Finish this session</b></div>'}</section><footer class="pw-train-nav"><button id="pwSeqPrev" ${activeEx===0?'disabled':''}>← PREVIOUS</button><button id="pwSeqNext" class="primary">${activeEx===log.exercises.length-1?'FINISH SESSION':'START NEXT EXERCISE →'}</button></footer>`;
@@ -234,7 +234,20 @@ function hiitModal(session){
   startTick();
 }
 
-function openSession(track,w,s){if(!canOpen(track,w,s))return;const session=sessionFor(track,w,s);if(!session)return;activeEx=0;if(completed(track,w,s)){showCompleted(session,getSeq(track,w,s));return}track==='run'?runModal(session):track==='hiit'?hiitModal(session):strengthModal(session)}
+function strengthResumeIndex(session,log){
+  if(!log||log.type!=='strength'||!Array.isArray(log.exercises))return 0;
+  const saved=Number(log.activeEx);
+  if(Number.isInteger(saved)&&saved>=0&&saved<log.exercises.length)return saved;
+  const min=session.sets.min;
+  for(let i=0;i<log.exercises.length;i++){
+    const ex=log.exercises[i]||{},sets=Array.isArray(ex.sets)?ex.sets:[],needed=min+((ex.optionalChosen||sets.length>min)?1:0);
+    let done=true;
+    for(let j=0;j<needed;j++)if(!(sets[j]&&sets[j].done)){done=false;break}
+    if(!done)return i;
+  }
+  return Math.max(0,log.exercises.length-1);
+}
+function openSession(track,w,s){if(!canOpen(track,w,s))return;const session=sessionFor(track,w,s);if(!session)return;const existing=getSeq(track,w,s);activeEx=(track==='gym'||track==='home')?strengthResumeIndex(session,existing):0;if(completed(track,w,s)){showCompleted(session,existing);return}track==='run'?runModal(session):track==='hiit'?hiitModal(session):strengthModal(session)}
 function showCompleted(session,log){
   const m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');stopTimers();
   if(session.track==='hiit'){
