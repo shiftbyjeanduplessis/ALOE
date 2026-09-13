@@ -1,0 +1,158 @@
+name: Perfect Women fix exercise content now
+
+on:
+  push:
+    branches: [perfect-women-start-here]
+    paths:
+      - '.github/workflows/pw-fix-exercise-content-now.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perfect-women-start-here
+      - name: Install PDF tools and clone approved program source
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y poppler-utils
+          git clone --depth=1 https://github.com/shiftbyjeanduplessis/PERFECTWOMEN.git /tmp/pw-source
+      - name: Add approved workout page visual references
+        run: |
+          set -e
+          GYM='/tmp/pw-source/downloads/05 - Perfect Women - Basic Gym Program.pdf'
+          HOME='/tmp/pw-source/downloads/06 - Perfect Women - Home Dumbbell Program.pdf'
+          mkdir -p /tmp/gym /tmp/home perfect-women-start-here/asset_sources
+          pdftoppm -f 6 -l 12 -jpeg -r 110 "$GYM" /tmp/gym/gym >/dev/null 2>&1
+          pdftoppm -f 6 -l 12 -jpeg -r 110 "$HOME" /tmp/home/home >/dev/null 2>&1
+          i=6
+          for f in /tmp/gym/*.jpg; do printf -v n '%02d' "$i"; base64 -w0 "$f" > "perfect-women-start-here/asset_sources/pw-gym-page-$n.jpg.b64"; i=$((i+1)); done
+          i=6
+          for f in /tmp/home/*.jpg; do printf -v n '%02d' "$i"; base64 -w0 "$f" > "perfect-women-start-here/asset_sources/pw-home-page-$n.jpg.b64"; i=$((i+1)); done
+      - name: Correct all strength sessions, instructions and workout UI
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('perfect-women-start-here/dev_sources/pw-training-sequence-v5.js')
+          s=p.read_text()
+          a=s.index('const STRENGTH={')
+          b=s.index('\n\nconst RUN={',a)
+          strength=r'''const STRENGTH={
+            gym:{
+              label:'Basic Gym', rest:[60,75],
+              sessions:[
+                {name:'Lower Body A',guide:'/assets/pw-gym-page-06.jpg',ex:[
+                  {n:'Leg Press',r:'12',w:1,c:'Feet shoulder-width. Lower with control. Do not lock the knees.'},
+                  {n:'Goblet Squat',r:'12',w:1,c:'Hold one dumbbell at chest height. Sit down and back; keep chest up.'},
+                  {n:'Seated Leg Curl',r:'12',w:1,c:'Sit tall. Curl smoothly and squeeze the hamstrings.'},
+                  {n:'Leg Extension',r:'12',w:1,c:'Lift with control. Do not swing the weight.'},
+                  {n:'Hip Thrust / Glute Bridge',r:'12',w:1,c:'Drive hips up and squeeze the glutes at the top.'},
+                  {n:'Standing Calf Raise',r:'12',w:1,c:'Rise onto the toes, pause, then lower slowly.'}
+                ]},
+                {name:'Upper Body A',guide:'/assets/pw-gym-page-07.jpg',ex:[
+                  {n:'Lat Pulldown',r:'12',w:1,c:'Pull toward the upper chest. Drive the elbows down.'},
+                  {n:'Seated Chest Press',r:'12',w:1,c:'Press straight forward under control. Do not lock the elbows.'},
+                  {n:'Seated Cable Row',r:'12',w:1,c:'Pull the elbows back and squeeze the shoulder blades.'},
+                  {n:'Dumbbell Shoulder Press',r:'12',w:1,c:'Start at shoulder height. Press overhead without arching the back.'},
+                  {n:'Dumbbell Biceps Curl',r:'12',w:1,c:'Keep elbows close to the body. Do not swing.'},
+                  {n:'Cable Triceps Pushdown',r:'12',w:1,c:'Keep upper arms still and straighten the elbows under control.'}
+                ]},
+                {name:'Lower Body B + Core',guide:'/assets/pw-gym-page-08.jpg',ex:[
+                  {n:'Dumbbell Romanian Deadlift',r:'12',w:1,c:'Push the hips back, keep the spine long and load the hamstrings.'},
+                  {n:'Reverse Lunge',r:'12 each',w:1,c:'Step back under control. Push through the front foot to stand.'},
+                  {n:'Hip Abduction Machine',r:'12',w:1,c:'Open the knees under control. Avoid bouncing the stack.'},
+                  {n:'Hip Adduction Machine',r:'12',w:1,c:'Bring the legs together under control.'},
+                  {n:'Glute Kickback',r:'12 each',w:1,c:'Keep the pelvis stable and drive the leg back with the glute.'},
+                  {n:'Dead Bug',r:'12 total',w:0,c:'Extend opposite arm and leg while keeping the lower back controlled.'},
+                  {n:'Standard Plank',r:'30–45 sec',w:0,t:'seconds',c:'Forearms on the floor. Keep a straight line from head to heels.'}
+                ]},
+                {name:'Upper Body B + Full Body',guide:'/assets/pw-gym-page-09.jpg',ex:[
+                  {n:'Assisted Pull-Up OR Lat Pulldown',r:'12',w:1,c:'Choose the version that lets you control the full set.'},
+                  {n:'Incline Dumbbell Chest Press',r:'12',w:1,c:'Keep shoulder blades supported and press smoothly.'},
+                  {n:'One-Arm Dumbbell Row',r:'12 each',w:1,c:'Brace the torso and pull the elbow toward the hip.'},
+                  {n:'Dumbbell Lateral Raise',r:'12',w:1,c:'Use a light weight. Lift to about shoulder height.'},
+                  {n:'Dumbbell Squat to Press',r:'12',w:1,c:'Stand strongly from the squat before pressing overhead.'},
+                  {n:'Cable Biceps Curl',r:'12',w:1,c:'Keep elbows close and use a controlled range.'},
+                  {n:'Cable Triceps Pushdown',r:'12',w:1,c:'Keep upper arms still. Do not lean onto the cable.'}
+                ]}
+              ]
+            },
+            home:{
+              label:'Home Dumbbell', rest:[45,60],
+              sessions:[
+                {name:'Lower Body A',guide:'/assets/pw-home-page-06.jpg',ex:[
+                  {n:'Goblet Squat',r:'8–12',w:1,c:'Hold one dumbbell at chest height. Sit down and back, keep chest up.'},
+                  {n:'Dumbbell Romanian Deadlift',r:'8–12',w:1,c:'Push the hips back, keep the spine long and load the hamstrings.'},
+                  {n:'Dumbbell Glute Bridge',r:'10–15',w:1,c:'Drive through the heels. Squeeze the glutes at the top. Lower slowly.'},
+                  {n:'Full Dead Bug',r:'6–10 / side',w:0,c:'Extend opposite arm and leg slowly. Keep the lower back controlled.'}
+                ]},
+                {name:'Upper Body A',guide:'/assets/pw-home-page-07.jpg',ex:[
+                  {n:'Dumbbell Floor Press',r:'8–12',w:1,c:'Press straight up. Keep shoulders down. Lower until the upper arms touch the floor.'},
+                  {n:'Supported One-Arm Row',r:'8–12 / arm',w:1,c:'Brace on a sturdy chair. Row the dumbbell toward your hip. Lower slowly.'},
+                  {n:'Seated Shoulder Press',r:'8–12',w:1,c:'Sit tall. Press overhead. Keep ribs down. Control the lowering phase.'},
+                  {n:'Overhead Triceps Extension',r:'8–12',w:1,c:'Keep elbows pointing up. Lower behind the head. Extend fully.'}
+                ]},
+                {name:'Lower Body B + Core',guide:'/assets/pw-home-page-08.jpg',ex:[
+                  {n:'Reverse Lunge',r:'8–10 / leg',w:1,c:'Step back under control. Push through the front foot to stand.'},
+                  {n:'Dumbbell Romanian Deadlift',r:'8–12',w:1,c:'Push the hips back. Keep the spine long and load the hamstrings.'},
+                  {n:'Sumo Squat',r:'10–12',w:1,c:'Take a wide stance. Sit down between the hips. Stand tall.'},
+                  {n:'Dumbbell Glute Bridge',r:'10–15',w:1,c:'Drive through the heels. Pause and squeeze the glutes at the top.'}
+                ]},
+                {name:'Upper Body B + Core',guide:'/assets/pw-home-page-09.jpg',ex:[
+                  {n:'Dumbbell Floor Press',r:'8–12',w:1,c:'Press upward with control. Lower until the upper arms touch the floor.'},
+                  {n:'Supported One-Arm Row',r:'8–12 / arm',w:1,c:'Keep a flat back. Pull toward the hip. Control the lowering.'},
+                  {n:'Overhead Triceps Extension',r:'8–12',w:1,c:'Elbows point up. Keep the upper arms steady. Extend fully.'},
+                  {n:'Full Dead Bug',r:'6–10 / side',w:0,c:'Extend opposite arm and leg while keeping the lower back controlled.'}
+                ]}
+              ]
+            }
+          };'''
+          s=s[:a]+strength+s[b:]
+
+          old=r'''function strengthSession(track,w,s){
+            const cfg=STRENGTH[track]; if(!cfg)return null;
+            const lower=s===1||s===3;
+            let name=lower?(track==='gym'?'Lower Body':'Lower Body + Core'):'Upper Body';
+            if(s>2) name+=' · repeat approved template';
+            let ex=(lower?cfg.lower:cfg.upper).map(x=>({...x}));
+            if(track==='home'&&s===4) ex=[...ex,{n:'Full Dead Bug',r:'6–10 / side',w:0}];
+            return {track,w,s,name,ex,sets:strengthProgression(track,w),rest:cfg.rest};
+          }'''
+          new=r'''function strengthSession(track,w,s){
+            const cfg=STRENGTH[track]; if(!cfg||!cfg.sessions||!cfg.sessions[s-1])return null;
+            const src=cfg.sessions[s-1];
+            return {track,w,s,name:src.name,guide:src.guide,ex:src.ex.map(x=>({...x})),sets:strengthProgression(track,w),rest:cfg.rest};
+          }'''
+          if old not in s:
+              raise SystemExit('strengthSession block not found')
+          s=s.replace(old,new,1)
+
+          oldfrag='''<section class="pw-ex-card"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${log.exercises.length}</div><h1>${esc(ex.name)}</h1><p>${esc(session.sets.label)} · target ${esc(target.r)}${prev?`<br><span>Last logged: ${esc(prev.weight||'—')}${target.w?' kg':''} × ${esc(prev.reps||'—')}</span>`:''}</p><div class="pw-set-head ${target.w?'':'no-weight'}"><span>SET</span>${target.w?'<span>KG</span>':''}<span>REPS</span><span>DONE</span></div><div class="pw-set-list">${ex.sets.map((x,i)=>`<div class="pw-set-row ${target.w?'':'no-weight'} ${x.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(x.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(x.reps)}" placeholder="reps"><button data-setdone="${i}">${x.done?'✓':'DONE'}</button></div>`).join('')}</div>${session.sets.max>ex.sets.length?'<button id="pwSeqAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}</section>'''
+          newfrag='''${session.guide?`<details class="pw-session-guide"><summary>VIEW APPROVED SESSION GUIDE</summary><img src="${esc(session.guide)}" alt="${esc(session.name)} approved workout guide"></details>`:''}<section class="pw-ex-card"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${log.exercises.length}</div><h1>${esc(ex.name)}</h1><p class="pw-ex-cue">${esc(target.c||'')}</p><p>${esc(session.sets.label)} · target ${esc(target.r)}${prev?`<br><span>Last logged: ${esc(prev.weight||'—')}${target.w?' kg':''} × ${esc(prev.reps||'—')}</span>`:''}</p><div class="pw-set-head ${target.w?'':'no-weight'}"><span>SET</span>${target.w?'<span>KG</span>':''}<span>${target.t==='seconds'?'SECONDS':'REPS'}</span><span>DONE</span></div><div class="pw-set-list">${ex.sets.map((x,i)=>`<div class="pw-set-row ${target.w?'':'no-weight'} ${x.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(x.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(x.reps)}" placeholder="${target.t==='seconds'?'sec':'reps'}"><button data-setdone="${i}">${x.done?'✓':'DONE'}</button></div>`).join('')}</div>${session.sets.max>ex.sets.length?'<button id="pwSeqAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}</section>'''
+          if oldfrag not in s:
+              raise SystemExit('workout card fragment not found')
+          s=s.replace(oldfrag,newfrag,1)
+          p.write_text(s)
+
+          css=Path('perfect-women-start-here/dev_sources/pw-training-sequence-v5.css')
+          c=css.read_text()
+          marker='/* approved exercise guide + cue */'
+          if marker not in c:
+              c+='''\n/* approved exercise guide + cue */\n.pw-session-guide{margin:0 0 12px;border:1px solid #cfe8ea;border-radius:16px;background:#fff;overflow:hidden}.pw-session-guide summary{cursor:pointer;list-style:none;padding:13px 15px;font-weight:900;color:#075568;background:#edfafa;letter-spacing:.03em}.pw-session-guide summary::-webkit-details-marker{display:none}.pw-session-guide img{display:block;width:100%;height:auto;border-top:1px solid #dcecec}.pw-ex-cue{margin:7px 0 10px!important;padding:10px 12px;border-left:4px solid #ffd62e;background:#fff9d9;border-radius:9px;color:#294f59!important;font-size:14px!important;font-weight:700;line-height:1.4}.pw-ex-card h1{margin-bottom:4px!important}\n'''
+          css.write_text(c)
+          PY
+          node --check perfect-women-start-here/dev_sources/pw-training-sequence-v5.js
+          base64 -w0 perfect-women-start-here/dev_sources/pw-training-sequence-v5.js > perfect-women-start-here/asset_sources/pw-training-sequence-v5.b64
+          base64 -w0 perfect-women-start-here/dev_sources/pw-training-sequence-v5.css > perfect-women-start-here/asset_sources/pw-training-sequence-v5.css.b64
+      - name: Commit corrected exercise content
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perfect-women-start-here/dev_sources/pw-training-sequence-v5.js perfect-women-start-here/dev_sources/pw-training-sequence-v5.css perfect-women-start-here/asset_sources/pw-training-sequence-v5.b64 perfect-women-start-here/asset_sources/pw-training-sequence-v5.css.b64 perfect-women-start-here/asset_sources/pw-gym-page-*.jpg.b64 perfect-women-start-here/asset_sources/pw-home-page-*.jpg.b64
+          git commit -m 'Fix approved exercise order cues reps and visual guides'
+          git push origin HEAD:perfect-women-start-here
