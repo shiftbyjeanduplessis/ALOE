@@ -6,24 +6,70 @@ window.__PW_SEQUENCE_TRAINING_V5__=true;
 const STRENGTH={
   gym:{
     label:'Basic Gym', rest:[60,75],
-    lower:[
-      {n:'Leg Press',r:'12',w:1},{n:'Goblet Squat',r:'12',w:1},{n:'Seated Leg Curl',r:'12',w:1},
-      {n:'Leg Extension',r:'12',w:1},{n:'Hip Thrust / Glute Bridge',r:'12',w:1},{n:'Standing Calf Raise',r:'12',w:1}
-    ],
-    upper:[
-      {n:'Lat Pulldown',r:'12',w:1},{n:'Seated Chest Press',r:'12',w:1},{n:'Seated Cable Row',r:'12',w:1},
-      {n:'Dumbbell Shoulder Press',r:'12',w:1},{n:'Dumbbell Biceps Curl',r:'12',w:1},{n:'Cable Triceps Pushdown',r:'12',w:1}
+    sessions:[
+      {name:'Lower Body A',guide:'/assets/pw-gym-page-06.jpg',ex:[
+        {n:'Leg Press',r:'12',w:1,c:'Feet shoulder-width. Lower with control. Do not lock the knees.'},
+        {n:'Goblet Squat',r:'12',w:1,c:'Hold one dumbbell at chest height. Sit down and back; keep chest up.'},
+        {n:'Seated Leg Curl',r:'12',w:1,c:'Sit tall. Curl smoothly and squeeze the hamstrings.'},
+        {n:'Leg Extension',r:'12',w:1,c:'Lift with control. Do not swing the weight.'},
+        {n:'Hip Thrust / Glute Bridge',r:'12',w:1,c:'Drive hips up and squeeze the glutes at the top.'},
+        {n:'Standing Calf Raise',r:'12',w:1,c:'Rise onto the toes, pause, then lower slowly.'}
+      ]},
+      {name:'Upper Body A',guide:'/assets/pw-gym-page-07.jpg',ex:[
+        {n:'Lat Pulldown',r:'12',w:1,c:'Pull toward the upper chest. Drive the elbows down.'},
+        {n:'Seated Chest Press',r:'12',w:1,c:'Press straight forward under control. Do not lock the elbows.'},
+        {n:'Seated Cable Row',r:'12',w:1,c:'Pull the elbows back and squeeze the shoulder blades.'},
+        {n:'Dumbbell Shoulder Press',r:'12',w:1,c:'Start at shoulder height. Press overhead without arching the back.'},
+        {n:'Dumbbell Biceps Curl',r:'12',w:1,c:'Keep elbows close to the body. Do not swing.'},
+        {n:'Cable Triceps Pushdown',r:'12',w:1,c:'Keep upper arms still and straighten the elbows under control.'}
+      ]},
+      {name:'Lower Body B + Core',guide:'/assets/pw-gym-page-08.jpg',ex:[
+        {n:'Dumbbell Romanian Deadlift',r:'12',w:1,c:'Push the hips back, keep the spine long and load the hamstrings.'},
+        {n:'Reverse Lunge',r:'12 each',w:1,c:'Step back under control. Push through the front foot to stand.'},
+        {n:'Hip Abduction Machine',r:'12',w:1,c:'Open the knees under control. Avoid bouncing the stack.'},
+        {n:'Hip Adduction Machine',r:'12',w:1,c:'Bring the legs together under control.'},
+        {n:'Glute Kickback',r:'12 each',w:1,c:'Keep the pelvis stable and drive the leg back with the glute.'},
+        {n:'Dead Bug',r:'12 total',w:0,c:'Extend opposite arm and leg while keeping the lower back controlled.'},
+        {n:'Standard Plank',r:'30–45 sec',w:0,t:'seconds',c:'Forearms on the floor. Keep a straight line from head to heels.'}
+      ]},
+      {name:'Upper Body B + Full Body',guide:'/assets/pw-gym-page-09.jpg',ex:[
+        {n:'Assisted Pull-Up OR Lat Pulldown',r:'12',w:1,c:'Choose the version that lets you control the full set.'},
+        {n:'Incline Dumbbell Chest Press',r:'12',w:1,c:'Keep shoulder blades supported and press smoothly.'},
+        {n:'One-Arm Dumbbell Row',r:'12 each',w:1,c:'Brace the torso and pull the elbow toward the hip.'},
+        {n:'Dumbbell Lateral Raise',r:'12',w:1,c:'Use a light weight. Lift to about shoulder height.'},
+        {n:'Dumbbell Squat to Press',r:'12',w:1,c:'Stand strongly from the squat before pressing overhead.'},
+        {n:'Cable Biceps Curl',r:'12',w:1,c:'Keep elbows close and use a controlled range.'},
+        {n:'Cable Triceps Pushdown',r:'12',w:1,c:'Keep upper arms still. Do not lean onto the cable.'}
+      ]}
     ]
   },
   home:{
     label:'Home Dumbbell', rest:[45,60],
-    lower:[
-      {n:'Goblet Squat',r:'8–12',w:1},{n:'Dumbbell Romanian Deadlift',r:'8–12',w:1},
-      {n:'Dumbbell Glute Bridge',r:'10–15',w:1},{n:'Full Dead Bug',r:'6–10 / side',w:0}
-    ],
-    upper:[
-      {n:'Dumbbell Floor Press',r:'8–12',w:1},{n:'Supported One-Arm Row',r:'8–12 / arm',w:1},
-      {n:'Seated Shoulder Press',r:'8–12',w:1},{n:'Overhead Triceps Extension',r:'8–12',w:1}
+    sessions:[
+      {name:'Lower Body A',guide:'/assets/pw-home-page-06.jpg',ex:[
+        {n:'Goblet Squat',r:'8–12',w:1,c:'Hold one dumbbell at chest height. Sit down and back, keep chest up.'},
+        {n:'Dumbbell Romanian Deadlift',r:'8–12',w:1,c:'Push the hips back, keep the spine long and load the hamstrings.'},
+        {n:'Dumbbell Glute Bridge',r:'10–15',w:1,c:'Drive through the heels. Squeeze the glutes at the top. Lower slowly.'},
+        {n:'Full Dead Bug',r:'6–10 / side',w:0,c:'Extend opposite arm and leg slowly. Keep the lower back controlled.'}
+      ]},
+      {name:'Upper Body A',guide:'/assets/pw-home-page-07.jpg',ex:[
+        {n:'Dumbbell Floor Press',r:'8–12',w:1,c:'Press straight up. Keep shoulders down. Lower until the upper arms touch the floor.'},
+        {n:'Supported One-Arm Row',r:'8–12 / arm',w:1,c:'Brace on a sturdy chair. Row the dumbbell toward your hip. Lower slowly.'},
+        {n:'Seated Shoulder Press',r:'8–12',w:1,c:'Sit tall. Press overhead. Keep ribs down. Control the lowering phase.'},
+        {n:'Overhead Triceps Extension',r:'8–12',w:1,c:'Keep elbows pointing up. Lower behind the head. Extend fully.'}
+      ]},
+      {name:'Lower Body B + Core',guide:'/assets/pw-home-page-08.jpg',ex:[
+        {n:'Reverse Lunge',r:'8–10 / leg',w:1,c:'Step back under control. Push through the front foot to stand.'},
+        {n:'Dumbbell Romanian Deadlift',r:'8–12',w:1,c:'Push the hips back. Keep the spine long and load the hamstrings.'},
+        {n:'Sumo Squat',r:'10–12',w:1,c:'Take a wide stance. Sit down between the hips. Stand tall.'},
+        {n:'Dumbbell Glute Bridge',r:'10–15',w:1,c:'Drive through the heels. Pause and squeeze the glutes at the top.'}
+      ]},
+      {name:'Upper Body B + Core',guide:'/assets/pw-home-page-09.jpg',ex:[
+        {n:'Dumbbell Floor Press',r:'8–12',w:1,c:'Press upward with control. Lower until the upper arms touch the floor.'},
+        {n:'Supported One-Arm Row',r:'8–12 / arm',w:1,c:'Keep a flat back. Pull toward the hip. Control the lowering.'},
+        {n:'Overhead Triceps Extension',r:'8–12',w:1,c:'Elbows point up. Keep the upper arms steady. Extend fully.'},
+        {n:'Full Dead Bug',r:'6–10 / side',w:0,c:'Extend opposite arm and leg while keeping the lower back controlled.'}
+      ]}
     ]
   }
 };
@@ -52,13 +98,9 @@ function strengthProgression(track,w){
   return w<=2?{min:2,max:2,label:'2 sets'}:w<=4?{min:2,max:3,label:'2–3 sets'}:{min:3,max:3,label:'3 sets'};
 }
 function strengthSession(track,w,s){
-  const cfg=STRENGTH[track]; if(!cfg)return null;
-  const lower=s===1||s===3;
-  let name=lower?(track==='gym'?'Lower Body':'Lower Body + Core'):'Upper Body';
-  if(s>2) name+=' · repeat approved template';
-  let ex=(lower?cfg.lower:cfg.upper).map(x=>({...x}));
-  if(track==='home'&&s===4) ex=[...ex,{n:'Full Dead Bug',r:'6–10 / side',w:0}];
-  return {track,w,s,name,ex,sets:strengthProgression(track,w),rest:cfg.rest};
+  const cfg=STRENGTH[track]; if(!cfg||!cfg.sessions||!cfg.sessions[s-1])return null;
+  const src=cfg.sessions[s-1];
+  return {track,w,s,name:src.name,guide:src.guide,ex:src.ex.map(x=>({...x})),sets:strengthProgression(track,w),rest:cfg.rest};
 }
 function runSession(w,s){const x=RUN[w]&&RUN[w][s-1];return x?{track:'run',w,s,name:x[0],detail:x[1]}:null}
 function sessionFor(track,w,s){return track==='run'?runSession(w,s):strengthSession(track,w,s)}
@@ -99,7 +141,7 @@ function newStrengthLog(session){
 function syncInputs(body,log){body.querySelectorAll('.pw-set-row').forEach(row=>{const i=+row.dataset.set,w=row.querySelector('[data-f="weight"]'),r=row.querySelector('[data-f="reps"]');if(w)log.exercises[activeEx].sets[i].weight=w.value;if(r)log.exercises[activeEx].sets[i].reps=r.value})}
 function strengthModal(session){
   stopTimers();const log=newStrengthLog(session);activeEx=Math.min(activeEx,log.exercises.length-1);const ex=log.exercises[activeEx],target=session.ex[activeEx],prev=priorExercise(session.track,ex.name,session.w,session.s),m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');
-  body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose" aria-label="Close">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span id="pwSeqElapsed">${fmtElapsed(log.startedAt)}</span></header><div class="pw-train-progress"><i style="width:${((activeEx+1)/log.exercises.length)*100}%"></i></div><section class="pw-ex-card"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${log.exercises.length}</div><h1>${esc(ex.name)}</h1><p>${esc(session.sets.label)} · target ${esc(target.r)}${prev?`<br><span>Last logged: ${esc(prev.weight||'—')}${target.w?' kg':''} × ${esc(prev.reps||'—')}</span>`:''}</p><div class="pw-set-head ${target.w?'':'no-weight'}"><span>SET</span>${target.w?'<span>KG</span>':''}<span>REPS</span><span>DONE</span></div><div class="pw-set-list">${ex.sets.map((x,i)=>`<div class="pw-set-row ${target.w?'':'no-weight'} ${x.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(x.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(x.reps)}" placeholder="reps"><button data-setdone="${i}">${x.done?'✓':'DONE'}</button></div>`).join('')}</div>${session.sets.max>ex.sets.length?'<button id="pwSeqAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}</section><div class="pw-rest-choice"><span>REST BETWEEN SETS</span>${session.rest.map(x=>`<button data-rest="${x}" class="${+log.rest===x?'on':''}">${x}s</button>`).join('')}</div><div id="pwSeqRest" class="pw-rest"><span>REST</span><b id="pwSeqRestTime">${log.rest}s</b><button id="pwSeqRestSkip">SKIP</button><button id="pwSeqRestPlus">+15s</button></div><footer class="pw-train-nav"><button id="pwSeqPrev" ${activeEx===0?'disabled':''}>← PREVIOUS</button><button id="pwSeqNext" class="primary">${activeEx===log.exercises.length-1?'FINISH SESSION':'NEXT EXERCISE →'}</button></footer>`;
+  body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose" aria-label="Close">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span id="pwSeqElapsed">${fmtElapsed(log.startedAt)}</span></header><div class="pw-train-progress"><i style="width:${((activeEx+1)/log.exercises.length)*100}%"></i></div>${session.guide?`<details class="pw-session-guide"><summary>VIEW APPROVED SESSION GUIDE</summary><img src="${esc(session.guide)}" alt="${esc(session.name)} approved workout guide"></details>`:''}<section class="pw-ex-card"><div class="pw-ex-count">EXERCISE ${activeEx+1} OF ${log.exercises.length}</div><h1>${esc(ex.name)}</h1><p class="pw-ex-cue">${esc(target.c||'')}</p><p>${esc(session.sets.label)} · target ${esc(target.r)}${prev?`<br><span>Last logged: ${esc(prev.weight||'—')}${target.w?' kg':''} × ${esc(prev.reps||'—')}</span>`:''}</p><div class="pw-set-head ${target.w?'':'no-weight'}"><span>SET</span>${target.w?'<span>KG</span>':''}<span>${target.t==='seconds'?'SECONDS':'REPS'}</span><span>DONE</span></div><div class="pw-set-list">${ex.sets.map((x,i)=>`<div class="pw-set-row ${target.w?'':'no-weight'} ${x.done?'done':''}" data-set="${i}"><b>${i+1}</b>${target.w?`<input data-f="weight" inputmode="decimal" type="number" min="0" step="0.5" value="${esc(x.weight)}" placeholder="kg">`:''}<input data-f="reps" inputmode="numeric" type="number" min="0" step="1" value="${esc(x.reps)}" placeholder="${target.t==='seconds'?'sec':'reps'}"><button data-setdone="${i}">${x.done?'✓':'DONE'}</button></div>`).join('')}</div>${session.sets.max>ex.sets.length?'<button id="pwSeqAddSet" class="pw-add-set">+ ADD OPTIONAL SET</button>':''}</section><div class="pw-rest-choice"><span>REST BETWEEN SETS</span>${session.rest.map(x=>`<button data-rest="${x}" class="${+log.rest===x?'on':''}">${x}s</button>`).join('')}</div><div id="pwSeqRest" class="pw-rest"><span>REST</span><b id="pwSeqRestTime">${log.rest}s</b><button id="pwSeqRestSkip">SKIP</button><button id="pwSeqRestPlus">+15s</button></div><footer class="pw-train-nav"><button id="pwSeqPrev" ${activeEx===0?'disabled':''}>← PREVIOUS</button><button id="pwSeqNext" class="primary">${activeEx===log.exercises.length-1?'FINISH SESSION':'NEXT EXERCISE →'}</button></footer>`;
   body.querySelector('#pwSeqClose').onclick=()=>{syncInputs(body,log);putSeq(session.track,session.w,session.s,log);closeModal()};body.querySelectorAll('.pw-set-row input').forEach(inp=>inp.onchange=()=>{syncInputs(body,log);putSeq(session.track,session.w,session.s,log)});body.querySelectorAll('[data-setdone]').forEach(btn=>btn.onclick=()=>{syncInputs(body,log);const i=+btn.dataset.setdone;log.exercises[activeEx].sets[i].done=!log.exercises[activeEx].sets[i].done;putSeq(session.track,session.w,session.s,log);const done=log.exercises[activeEx].sets[i].done;strengthModal(session);if(done)requestAnimationFrame(()=>runRest(+log.rest||session.rest[0]))});const add=body.querySelector('#pwSeqAddSet');if(add)add.onclick=()=>{syncInputs(body,log);log.exercises[activeEx].sets.push({weight:'',reps:'',done:false});putSeq(session.track,session.w,session.s,log);strengthModal(session)};body.querySelectorAll('[data-rest]').forEach(btn=>btn.onclick=()=>{syncInputs(body,log);log.rest=+btn.dataset.rest;putSeq(session.track,session.w,session.s,log);strengthModal(session)});body.querySelector('#pwSeqRestSkip').onclick=()=>{if(restTimer)clearInterval(restTimer);restTimer=null;body.querySelector('#pwSeqRest').classList.remove('on')};body.querySelector('#pwSeqRestPlus').onclick=()=>{restLeft+=15;const t=body.querySelector('#pwSeqRestTime');if(t)t.textContent=restLeft+'s'};body.querySelector('#pwSeqPrev').onclick=()=>{syncInputs(body,log);putSeq(session.track,session.w,session.s,log);activeEx--;strengthModal(session)};body.querySelector('#pwSeqNext').onclick=()=>{syncInputs(body,log);putSeq(session.track,session.w,session.s,log);if(activeEx<log.exercises.length-1){activeEx++;strengthModal(session)}else finishStrength(session,log)};startElapsed(log)
 }
 function finishStrength(session,log){stopTimers();log.completed=true;log.completedAt=new Date().toISOString();log.completedDate=today();log.elapsedSec=Math.max(0,Math.floor((new Date(log.completedAt)-new Date(log.startedAt))/1000));putSeq(session.track,session.w,session.s,log);markMove();const sets=log.exercises.reduce((n,e)=>n+(e.sets||[]).filter(x=>x.done).length,0),body=ensureModal().querySelector('#pwSequenceBody');body.innerHTML=`<div class="pw-finish"><div class="pw-finish-check">✓</div><small>SESSION ${session.s} COMPLETE</small><h1>${esc(session.name)}</h1><p>${sets} sets logged · ${Math.max(1,Math.round(log.elapsedSec/60))} minutes</p><div class="pw-finish-next">Your next training session is now unlocked.</div><button id="pwSeqFinishClose">BACK TO PROGRAM</button></div>`;body.querySelector('#pwSeqFinishClose').onclick=closeModal}
