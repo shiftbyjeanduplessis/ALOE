@@ -24,7 +24,7 @@ jobs:
       - name: Extract authoritative program text, image inventory and page OCR
         run: |
           set -e
-          mkdir -p perfect-women-start-here/audit/ocr/basic-gym perfect-women-start-here/audit/ocr/home-dumbbell perfect-women-start-here/audit/ocr/walking-running
+          mkdir -p perfect-women-start-here/audit/ocr/basic-gym perfect-women-start-here/audit/ocr/home-dumbbell perfect-women-start-here/audit/ocr/walking-running perfect-women-start-here/audit/tsv/basic-gym perfect-women-start-here/audit/tsv/home-dumbbell
           GYM='/tmp/pw-source/downloads/05 - Perfect Women - Basic Gym Program.pdf'
           HOME='/tmp/pw-source/downloads/06 - Perfect Women - Home Dumbbell Program.pdf'
           RUN='/tmp/pw-source/downloads/07 - Perfect Women - Walking and Running Program.pdf'
@@ -44,6 +44,10 @@ jobs:
           for f in /tmp/gym-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/basic-gym/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
           for f in /tmp/home-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/home-dumbbell/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
           for f in /tmp/run-pages/*.jpg; do n=$(basename "$f" .jpg); tesseract "$f" "perfect-women-start-here/audit/ocr/walking-running/$n" -l eng --psm 6 >/dev/null 2>&1 || true; done
+          for p in 06 07 08 09; do
+            tesseract "/tmp/gym-pages/page-$p.jpg" stdout -l eng --psm 11 tsv > "perfect-women-start-here/audit/tsv/basic-gym/page-$p.tsv" 2>/dev/null || true
+            tesseract "/tmp/home-pages/page-$p.jpg" stdout -l eng --psm 11 tsv > "perfect-women-start-here/audit/tsv/home-dumbbell/page-$p.tsv" 2>/dev/null || true
+          done
           {
             for f in perfect-women-start-here/audit/ocr/basic-gym/page-*.txt; do echo "===== $(basename "$f") ====="; cat "$f"; echo; done
           } > perfect-women-start-here/audit/basic-gym-ocr-all.txt
@@ -59,5 +63,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add perfect-women-start-here/audit
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'Extract authoritative exercise program OCR audit'
+          git commit -m 'Add exercise-page OCR coordinates to audit'
           git push origin HEAD:perfect-women-ui-v2
