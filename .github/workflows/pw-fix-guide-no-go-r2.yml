@@ -1,0 +1,75 @@
+name: Perfect Women fix guide no-go r2
+
+on:
+  push:
+    branches: [perfect-women-start-here]
+    paths:
+      - '.github/workflows/pw-fix-guide-no-go-r2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perfect-women-start-here
+      - name: Extract authoritative guide patch from prior workflow
+        shell: bash
+        run: |
+          mkdir -p perfect-women-start-here/dev_sources perfect-women-start-here/asset_sources
+          awk '/^          \(function\(\)\{/{flag=1} /^          JS$/{flag=0} flag{sub(/^          /,""); print}' .github/workflows/pw-fix-guide-no-go.yml > perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          test -s perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          node --check perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          base64 -w0 perfect-women-start-here/dev_sources/pw-guide-fix-v1.js > perfect-women-start-here/asset_sources/pw-guide-fix-v1.b64
+      - name: Wire patch after training and before release fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          p=Path('perfect-women-start-here/dev_sources/app-page-v3.html')
+          s=p.read_text()
+          if '/assets/pw-guide-fix-v1' not in s:
+              anchor="'/assets/pw-training-sequence-v5','/assets/pw-release-fixes-v6'"
+              repl="'/assets/pw-training-sequence-v5','/assets/pw-guide-fix-v1','/assets/pw-release-fixes-v6'"
+              if anchor not in s: raise SystemExit('current app loader anchor not found')
+              s=s.replace(anchor,repl)
+          p.write_text(s)
+          Path('perfect-women-start-here/asset_sources/app-page.html.b64').write_text(base64.b64encode(s.encode()).decode())
+          PY
+      - name: Bump cache and precache guide patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,re
+          p=Path('perfect-women-start-here/dev_sources/sw-v3.js')
+          s=p.read_text()
+          s=re.sub(r"const C='[^']+';","const C='pw8-v6-2';",s,count=1)
+          if "'/assets/pw-guide-fix-v1'" not in s:
+              anchor="'/assets/pw-training-sequence-v5','/assets/pw-release-fixes-v6'"
+              repl="'/assets/pw-training-sequence-v5','/assets/pw-guide-fix-v1','/assets/pw-release-fixes-v6'"
+              if anchor not in s: raise SystemExit('current sw anchor not found')
+              s=s.replace(anchor,repl)
+          p.write_text(s)
+          Path('perfect-women-start-here/asset_sources/sw.js.b64').write_text(base64.b64encode(s.encode()).decode())
+          PY
+      - name: Focused static checks
+        run: |
+          grep -q "pw-guide-fix-v1" perfect-women-start-here/dev_sources/app-page-v3.html
+          grep -q "pw-guide-fix-v1" perfect-women-start-here/dev_sources/sw-v3.js
+          grep -q "Standard Plank','30–45 sec" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          grep -q "Dead Bug','12 total" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          grep -q "Full Dead Bug','6–10 / side" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+          grep -q "One-Arm Dumbbell Row','12 each" perfect-women-start-here/dev_sources/pw-guide-fix-v1.js
+      - name: Commit live guide fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add perfect-women-start-here/dev_sources/pw-guide-fix-v1.js perfect-women-start-here/asset_sources/pw-guide-fix-v1.b64 perfect-women-start-here/dev_sources/app-page-v3.html perfect-women-start-here/asset_sources/app-page.html.b64 perfect-women-start-here/dev_sources/sw-v3.js perfect-women-start-here/asset_sources/sw.js.b64
+          git commit -m 'Serve app-aligned strength session guides'
+          git push origin HEAD:perfect-women-start-here
