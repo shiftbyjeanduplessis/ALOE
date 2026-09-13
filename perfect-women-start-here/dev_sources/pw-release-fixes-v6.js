@@ -7,6 +7,7 @@ const QA_KEY='pw8v4-qa-date-v2';
 const PLAN_META={
   gym:'4 strength sessions · 35–45 min',
   home:'4 home sessions · 20 min max',
+  hiit:'4 × 20-minute Home HIIT sessions',
   run:'4 sessions · 20–40 min'
 };
 

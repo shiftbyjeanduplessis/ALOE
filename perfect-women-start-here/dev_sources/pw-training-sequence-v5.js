@@ -74,6 +74,47 @@ const STRENGTH={
   }
 };
 
+const HIIT=[
+  {name:'Circuit 1 — Upper + Cardio',kind:'circuit',detail:'Cycle through the sequence until you reach 20 minutes.',duration:20,ex:[
+    {n:'Jump Rope or Cross Jacks',v:'30 sec'},
+    {n:'Wall Push-Ups',v:'10 reps'},
+    {n:'Small Arm Circles',v:'30 reps'},
+    {n:'High Knees',v:'30 sec'},
+    {n:'Dumbbell Shoulder Press',v:'10 reps · household object is fine'},
+    {n:'Wall Push-Ups',v:'10 reps'},
+    {n:'Punches',v:'50 reps'},
+    {n:'Tricep Kickback',v:'10 / arm · dumbbell or household object'},
+    {n:'Large Arm Circles',v:'30 reps'}
+  ]},
+  {name:'Pyramid Workout',kind:'pyramid',detail:'10 rounds. Every round do one rep less of each exercise. Squats stay at a minimum of 1 rep.',duration:20,rounds:10,ex:[
+    {n:'Squat / Chair Squat',base:8,v:'8 reps'},
+    {n:'Star Jumps',base:20,v:'20 reps'},
+    {n:'Plank with Reach',base:10,v:'10 reps'},
+    {n:'Punches',base:20,v:'20 reps'},
+    {n:'Sit-Up',base:10,v:'10 reps'},
+    {n:'Heel Tap',base:40,v:'40 reps'}
+  ]},
+  {name:'Circuit 2 — Full Body',kind:'circuit',detail:'Complete the sequence repeatedly for 20 minutes.',duration:20,ex:[
+    {n:'Jump Rope or Cross Jacks',v:'30 sec'},
+    {n:'Bodyweight / Chair Squats',v:'10 reps'},
+    {n:'Superman',v:'10 reps'},
+    {n:'High Knees',v:'30 sec'},
+    {n:'Simple Lunges',v:'10 / leg'},
+    {n:'Reverse Crunch',v:'10 reps'},
+    {n:'Skaters',v:'30 sec'},
+    {n:'Glute Bridges',v:'10 reps'},
+    {n:'Dead Bug',v:'10 reps'}
+  ]},
+  {name:'Strength + Conditioning',kind:'sets',detail:'Structured work with one-minute rests. Complete the prescribed sets within the 20-minute session.',duration:20,ex:[
+    {n:'High Knees',v:'30 sec × 3',sets:3},
+    {n:'Hip Flexor Stretch',v:'30 sec / leg × 2',sets:2},
+    {n:'Squat / Chair Squat',v:'10 reps × 3',sets:3},
+    {n:'Glute Bridges',v:'12 reps × 3',sets:3},
+    {n:'Lunges',v:'10 / leg × 3',sets:3},
+    {n:'Mountain Climbers',v:'30 reps × 3',sets:3}
+  ]}
+];
+
 const RUN={
   1:[['Easy Walk','20 min easy walk. Comfortable pace.'],['Intervals','5 min easy + 5 × (1 min brisk / 1 min easy) + 5 min easy.'],['Recovery Walk','20 min recovery walk. Easy pace.'],['Longer Walk','25 min steady walk.']],
   2:[['Easy Walk','25 min easy walk.'],['Intervals','5 min easy + 5 × (1 min jog / 2 min walk) + 5 min easy.'],['Recovery Walk','20 min recovery walk.'],['Longer Walk','30 min steady walk.']],
@@ -85,7 +126,7 @@ const RUN={
   8:[['Easy Run','30 min easy conversational run.'],['Intervals','5 min easy + 3 × (8 min run / 2 min walk) + 5 min easy.'],['Recovery Walk','30 min easy recovery walk.'],['Longer Run','40 min continuous easy run OR run/walk.']]
 };
 
-const TRACKS={gym:'Basic Gym',home:'Home Dumbbell',run:'Walking & Running'};
+const TRACKS={gym:'Basic Gym',home:'Home Dumbbell',hiit:'Home HIIT',run:'Walking & Running'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const curWeek=()=>{try{return Math.max(0,Math.min(8,+week()||0))}catch(e){return 0}};
 const today=()=>{try{return dateKey()}catch(e){return new Date().toISOString().slice(0,10)}};
@@ -103,7 +144,8 @@ function strengthSession(track,w,s){
   return {track,w,s,name:src.name,guide:src.guide,ex:src.ex.map(x=>({...x})),sets:strengthProgression(track,w),rest:cfg.rest};
 }
 function runSession(w,s){const x=RUN[w]&&RUN[w][s-1];return x?{track:'run',w,s,name:x[0],detail:x[1]}:null}
-function sessionFor(track,w,s){return track==='run'?runSession(w,s):strengthSession(track,w,s)}
+function hiitSession(w,s){const x=HIIT[s-1];return x?{track:'hiit',w,s,name:x.name,kind:x.kind,detail:x.detail,duration:x.duration||20,rounds:x.rounds||0,ex:x.ex.map(z=>({...z}))}:null}
+function sessionFor(track,w,s){return track==='run'?runSession(w,s):track==='hiit'?hiitSession(w,s):strengthSession(track,w,s)}
 function oldLog(track,w,s){return Object.values(logs()).find(l=>l&&l.track===track&&+l.week===w&&+l.day===s&&l.completed)}
 function getSeq(track,w,s){return logs()[seqKey(track,w,s)]||oldLog(track,w,s)||null}
 function putSeq(track,w,s,obj){logs()[seqKey(track,w,s)]=obj;saveState();return obj}
@@ -151,10 +193,35 @@ function runModal(session){
   body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span>LOG</span></header><section class="pw-run-card"><small>PLANNED SESSION</small><h1>${esc(session.name)}</h1><p>${esc(session.detail)}</p><div class="pw-run-note">Do the session without using the app. Come back afterwards and log what you did.</div><label>ACTUAL TIME <span>minutes</span><input id="pwSeqRunTime" type="number" inputmode="numeric" min="0" step="1" value="${esc(log.duration)}" placeholder="e.g. 30"></label><label>DISTANCE <span>km · optional</span><input id="pwSeqRunDistance" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(log.distance)}" placeholder="e.g. 4.2"></label><div class="pw-run-pace"><span>AVERAGE PACE</span><b id="pwSeqRunPace">${pace()}</b></div><label>EFFORT <span>1 easy · 5 very hard</span><select id="pwSeqRunEffort">${[1,2,3,4,5].map(x=>`<option ${String(log.effort)===String(x)?'selected':''}>${x}</option>`).join('')}</select></label><label class="pw-run-check"><input id="pwSeqRunPlan" type="checkbox" ${log.completedPlan?'checked':''}> I completed the planned session</label><label>NOTES <span>optional</span><textarea id="pwSeqRunNotes" rows="3" placeholder="How did it feel?">${esc(log.notes)}</textarea></label></section><footer class="pw-train-nav"><button id="pwSeqRunCancel">CANCEL</button><button id="pwSeqRunSave" class="primary">SAVE SESSION</button></footer>`;
   const pull=()=>{log.duration=body.querySelector('#pwSeqRunTime').value;log.distance=body.querySelector('#pwSeqRunDistance').value;log.effort=body.querySelector('#pwSeqRunEffort').value;log.completedPlan=body.querySelector('#pwSeqRunPlan').checked;log.notes=body.querySelector('#pwSeqRunNotes').value;body.querySelector('#pwSeqRunPace').textContent=pace()};body.querySelector('#pwSeqClose').onclick=closeModal;body.querySelector('#pwSeqRunCancel').onclick=closeModal;body.querySelector('#pwSeqRunTime').oninput=pull;body.querySelector('#pwSeqRunDistance').oninput=pull;body.querySelector('#pwSeqRunSave').onclick=()=>{pull();if(!log.duration){body.querySelector('#pwSeqRunTime').focus();return}log.completed=true;log.completedAt=new Date().toISOString();log.completedDate=today();putSeq('run',session.w,session.s,log);markMove();closeModal()}
 }
-function openSession(track,w,s){if(!canOpen(track,w,s))return;const session=sessionFor(track,w,s);if(!session)return;activeEx=0;if(completed(track,w,s)){showCompleted(session,getSeq(track,w,s));return}track==='run'?runModal(session):strengthModal(session)}
+
+let hiitTimer=null;
+function hiitTarget(session,ex,round){if(session.kind!=='pyramid')return ex.v||'';return Math.max(1,(+ex.base||1)-Math.max(0,(round||1)-1))+' reps'}
+function hiitLog(session){let log=getSeq('hiit',session.w,session.s);if(log&&!log.completed&&log.type==='hiit')return log;log={type:'hiit',track:'hiit',week:session.w,sessionNo:session.s,date:today(),session:session.name,startedAt:new Date().toISOString(),remainingSec:1200,running:false,round:1,roundsDone:0,checks:{},setCounts:{},notes:'',completed:false};putSeq('hiit',session.w,session.s,log);return log}
+function hiitModal(session){
+  stopTimers();if(hiitTimer){clearInterval(hiitTimer);hiitTimer=null}const log=hiitLog(session),m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');
+  function timeText(){const n=Math.max(0,+log.remainingSec||0),mm=Math.floor(n/60),ss=n%60;return `${mm}:${String(ss).padStart(2,'0')}`}
+  function target(ex){return hiitTarget(session,ex,log.round)}
+  function persist(){putSeq('hiit',session.w,session.s,log)}
+  function rows(){return session.ex.map((x,i)=>{if(session.kind==='sets'){const done=+(log.setCounts[i]||0),total=+(x.sets||1);return `<button class="pw-hiit-row ${done>=total?'done':''}" data-hiit-set="${i}"><span>${i+1}</span><b>${esc(x.n)}</b><em>${esc(x.v)}</em><strong>${done}/${total} DONE</strong></button>`}const done=!!log.checks[i];return `<button class="pw-hiit-row ${done?'done':''}" data-hiit-check="${i}"><span>${i+1}</span><b>${esc(x.n)}</b><em>${esc(target(x))}</em><strong>${done?'✓ DONE':'TAP DONE'}</strong></button>`}).join('')}
+  body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span>20 MIN</span></header><section class="pw-hiit-card"><div class="pw-hiit-clock"><small>SESSION TIMER</small><b id="pwHiitClock">${timeText()}</b><button id="pwHiitTimerBtn">${log.running?'PAUSE':'START'}</button></div><p class="pw-hiit-rule">${esc(session.detail)}</p><div class="pw-hiit-meta">${session.kind==='pyramid'?`ROUND <b>${log.round}/10</b>`:session.kind==='circuit'?`ROUNDS COMPLETE <b>${log.roundsDone}</b>`:'Complete each prescribed set in order.'}</div><div class="pw-hiit-list">${rows()}</div>${session.kind==='sets'?'<button id="pwHiitRest" class="pw-hiit-round">REST 60 SECONDS</button>':`<button id="pwHiitRound" class="pw-hiit-round">${session.kind==='pyramid'?'ROUND COMPLETE':'ROUND COMPLETE + RESET'}</button>`}<div id="pwHiitRestBox" class="pw-hiit-rest"></div><label class="pw-hiit-notes">SESSION NOTE <textarea id="pwHiitNotes" rows="2" placeholder="Optional">${esc(log.notes||'')}</textarea></label></section><footer class="pw-train-nav"><button id="pwHiitSave">SAVE + CLOSE</button><button id="pwHiitFinish" class="primary">FINISH SESSION</button></footer>`;
+  function startTick(){if(hiitTimer)clearInterval(hiitTimer);if(!log.running)return;hiitTimer=setInterval(()=>{log.remainingSec=Math.max(0,(+log.remainingSec||0)-1);const c=body.querySelector('#pwHiitClock');if(c)c.textContent=timeText();if(log.remainingSec<=0){log.running=false;clearInterval(hiitTimer);hiitTimer=null;const b=body.querySelector('#pwHiitTimerBtn');if(b)b.textContent='TIME';persist()}},1000)}
+  body.querySelector('#pwSeqClose').onclick=()=>{log.notes=body.querySelector('#pwHiitNotes').value;log.running=false;persist();if(hiitTimer)clearInterval(hiitTimer);hiitTimer=null;closeModal()};
+  body.querySelector('#pwHiitTimerBtn').onclick=()=>{log.running=!log.running;body.querySelector('#pwHiitTimerBtn').textContent=log.running?'PAUSE':'START';persist();startTick()};
+  body.querySelectorAll('[data-hiit-check]').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.hiitCheck;log.checks[i]=!log.checks[i];persist();hiitModal(session)});
+  body.querySelectorAll('[data-hiit-set]').forEach(btn=>btn.onclick=()=>{const i=+btn.dataset.hiitSet,total=+(session.ex[i].sets||1);log.setCounts[i]=Math.min(total,(+log.setCounts[i]||0)+1);persist();hiitModal(session)});
+  const round=body.querySelector('#pwHiitRound');if(round)round.onclick=()=>{log.roundsDone=(+log.roundsDone||0)+1;if(session.kind==='pyramid')log.round=Math.min(10,(+log.round||1)+1);log.checks={};persist();hiitModal(session)};
+  const rest=body.querySelector('#pwHiitRest');if(rest)rest.onclick=()=>{let left=60,box=body.querySelector('#pwHiitRestBox');box.textContent='REST 60s';const id=setInterval(()=>{left--;box.textContent=left>0?`REST ${left}s`:'REST COMPLETE';if(left<=0)clearInterval(id)},1000)};
+  body.querySelector('#pwHiitSave').onclick=()=>{log.notes=body.querySelector('#pwHiitNotes').value;log.running=false;persist();if(hiitTimer)clearInterval(hiitTimer);hiitTimer=null;closeModal()};
+  body.querySelector('#pwHiitFinish').onclick=()=>{log.notes=body.querySelector('#pwHiitNotes').value;log.running=false;log.completed=true;log.completedAt=new Date().toISOString();log.completedDate=today();log.elapsedSec=Math.max(0,1200-(+log.remainingSec||0));persist();markMove();if(hiitTimer)clearInterval(hiitTimer);hiitTimer=null;closeModal()};
+  startTick();
+}
+
+function openSession(track,w,s){if(!canOpen(track,w,s))return;const session=sessionFor(track,w,s);if(!session)return;activeEx=0;if(completed(track,w,s)){showCompleted(session,getSeq(track,w,s));return}track==='run'?runModal(session):track==='hiit'?hiitModal(session):strengthModal(session)}
 function showCompleted(session,log){
   const m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');stopTimers();
-  if(session.track==='run'){
+  if(session.track==='hiit'){
+    body.innerHTML=`<div class="pw-finish"><div class="pw-finish-check">✓</div><small>COMPLETED ${esc(fmtDate(log.completedDate||log.date))}</small><h1>${esc(session.name)}</h1><p>${log.roundsDone?esc(log.roundsDone)+' rounds · ':''}${log.elapsedSec?Math.max(1,Math.round(log.elapsedSec/60))+' minutes':'20-minute session'}</p><button id="pwSeqDoneClose">BACK TO PROGRAM</button></div>`;
+  }else if(session.track==='run'){
     const d=parseFloat(log.distance),t=parseFloat(log.duration),p=(d>0&&t>0)?(()=>{const x=t/d,mm=Math.floor(x),ss=Math.round((x-mm)*60);return `${mm}:${String(ss).padStart(2,'0')} / km`})():'—';
     body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose">×</button><div><small>WEEK ${session.w} · SESSION ${session.s}</small><b>${esc(session.name)}</b></div><span>DONE</span></header><section class="pw-run-card"><small>COMPLETED ${esc(fmtDate(log.completedDate||log.date))}</small><h1>${esc(session.name)}</h1><p>${esc(session.detail)}</p><div class="pw-run-summary"><div><span>TIME</span><b>${esc(log.duration||'—')} min</b></div><div><span>DISTANCE</span><b>${esc(log.distance||'—')} km</b></div><div><span>PACE</span><b>${esc(p)}</b></div><div><span>EFFORT</span><b>${esc(log.effort||'—')}/5</b></div></div>${log.notes?`<p class="pw-log-note">${esc(log.notes)}</p>`:''}</section><footer class="pw-train-nav"><button id="pwSeqDoneClose" class="primary">BACK TO PROGRAM</button></footer>`;
   }else{
@@ -162,12 +229,12 @@ function showCompleted(session,log){
   }
   body.querySelector('#pwSeqClose')?.addEventListener('click',closeModal);body.querySelector('#pwSeqDoneClose').onclick=closeModal;
 }
-function chooseTrack(){const m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');stopTimers();body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose">×</button><div><small>EXERCISE PROGRAM</small><b>Choose your program</b></div></header><div class="pw-seq-track-picker"><button data-track="gym"><b>Basic Gym</b><span>4 sessions each week · interactive set logging</span></button><button data-track="home"><b>Home Dumbbell</b><span>4 sessions each week · interactive set logging</span></button><button data-track="run"><b>Walking & Running</b><span>4 sessions each week · log after the session</span></button></div>`;body.querySelector('#pwSeqClose').onclick=closeModal;body.querySelectorAll('[data-track]').forEach(btn=>btn.onclick=()=>{S.track=btn.dataset.track;saveState();closeModal()})}
-function sessionCard(track,w,s){const session=sessionFor(track,w,s),log=getSeq(track,w,s),done=completed(track,w,s),open=canOpen(track,w,s),catchup=isCatchup(w,s,track),locked=!done&&!open,status=done?`DONE · ${fmtDate(log.completedDate||log.date)}`:catchup?'CATCH UP NEXT':open?'NEXT UP':w>curWeek()?'NOT YET':'LOCKED',detail=track==='run'?session.detail:(session.sets.label+' · '+session.ex.length+' exercises');return `<button class="pw-seq-session ${done?'done':''} ${open&&!done?'next':''} ${locked?'locked':''}" data-open-session="${w}|${s}" ${locked?'disabled':''}><span class="pw-seq-num">${done?'✓':s}</span><span class="pw-seq-copy"><small>SESSION ${s}</small><b>${esc(session.name)}</b><em>${esc(detail)}</em></span><span class="pw-seq-status">${esc(status)}</span></button>`}
+function chooseTrack(){const m=ensureModal(),body=m.querySelector('#pwSequenceBody');m.classList.add('on');stopTimers();body.innerHTML=`<header class="pw-train-head"><button id="pwSeqClose">×</button><div><small>EXERCISE PROGRAM</small><b>Choose your program</b></div></header><div class="pw-seq-track-picker"><button data-track="gym"><b>Basic Gym</b><span>4 sessions each week · interactive set logging</span></button><button data-track="home"><b>Home Dumbbell</b><span>4 sessions each week · interactive set logging</span></button><button data-track="hiit"><b>Home HIIT</b><span>4 × 20-minute sessions · live timer + round tracking</span></button><button data-track="run"><b>Walking & Running</b><span>4 sessions each week · log after the session</span></button></div>`;body.querySelector('#pwSeqClose').onclick=closeModal;body.querySelectorAll('[data-track]').forEach(btn=>btn.onclick=()=>{S.track=btn.dataset.track;saveState();closeModal()})}
+function sessionCard(track,w,s){const session=sessionFor(track,w,s),log=getSeq(track,w,s),done=completed(track,w,s),open=canOpen(track,w,s),catchup=isCatchup(w,s,track),locked=!done&&!open,status=done?`DONE · ${fmtDate(log.completedDate||log.date)}`:catchup?'CATCH UP NEXT':open?'NEXT UP':w>curWeek()?'NOT YET':'LOCKED',detail=track==='run'?session.detail:track==='hiit'?('20 min · '+session.ex.length+' exercises · '+(session.kind==='pyramid'?'pyramid':session.kind==='sets'?'structured sets':'repeat circuit')):(session.sets.label+' · '+session.ex.length+' exercises');return `<button class="pw-seq-session ${done?'done':''} ${open&&!done?'next':''} ${locked?'locked':''}" data-open-session="${w}|${s}" ${locked?'disabled':''}><span class="pw-seq-num">${done?'✓':s}</span><span class="pw-seq-copy"><small>SESSION ${s}</small><b>${esc(session.name)}</b><em>${esc(detail)}</em></span><span class="pw-seq-status">${esc(status)}</span></button>`}
 function weekBlock(track,w){const count=completedCount(track,w),cw=curWeek(),isCurrent=w===cw,hasCatchup=w<cw&&count<4,label=count===4?'COMPLETE':hasCatchup?'CATCH-UP':isCurrent?'THIS WEEK':w>cw?'UPCOMING':'IN PROGRESS',expanded=isCurrent||hasCatchup||(cw===0&&w===1);return `<section class="pw-seq-week ${isCurrent?'current':''} ${hasCatchup?'catchup':''} ${w>cw?'future':''}"><button class="pw-seq-week-head" data-week-toggle="${w}"><div><small>WEEK ${w}</small><h3>${count}/4 sessions complete</h3></div><span>${label}</span><i>${expanded?'−':'+'}</i></button><div class="pw-seq-week-body ${expanded?'open':''}" data-week-body="${w}">${[1,2,3,4].map(s=>sessionCard(track,w,s)).join('')}</div></section>`}
 function renderSequence(){
   const root=document.getElementById('exercise');if(!root)return;const track=TRACKS[S.track]?S.track:'gym';if(!S.track){S.track=track;saveState()}const cw=curWeek(),due=earliestDue(track);let banner='Your sessions stay in order. Move them to another day if life gets in the way.';if(cw===0)banner='Your program starts with Week 1. Sessions unlock in order when the challenge begins.';else if(due&&due.w<cw)banner=`You have a catch-up session from Week ${due.w}. Finish it first, then continue in sequence.`;else if(due)banner=`Next up: Week ${due.w}, Session ${due.s}. The day can move — the order does not.`;else banner='You are fully caught up. Nice work.';
-  root.innerHTML=`<div class="pw-seq-page"><div class="pw-seq-title"><div><small>YOUR PROGRAM</small><h1>${esc(TRACKS[track])}</h1><p>4 sessions per week · always in sequence</p></div><button id="pwSeqChange">CHANGE</button></div><div class="pw-seq-rule"><b>FLEXIBLE DAYS. FIXED ORDER.</b><span>${esc(banner)}</span></div><div class="pw-seq-weeks">${Array.from({length:8},(_,i)=>weekBlock(track,i+1)).join('')}</div></div>`;
+  root.innerHTML=`<div class="pw-seq-page"><div class="pw-seq-title"><div><small>YOUR PROGRAM</small><h1>${esc(TRACKS[track])}</h1><p>${track==='hiit'?'4 × 20 min · two extra walks encouraged':'4 sessions per week'} · always in sequence</p></div><button id="pwSeqChange">CHANGE</button></div><div class="pw-seq-rule"><b>FLEXIBLE DAYS. FIXED ORDER.</b><span>${esc(banner)}</span></div><div class="pw-seq-weeks">${Array.from({length:8},(_,i)=>weekBlock(track,i+1)).join('')}</div></div>`;
   root.querySelector('#pwSeqChange').onclick=chooseTrack;root.querySelectorAll('[data-week-toggle]').forEach(btn=>btn.onclick=()=>{const w=btn.dataset.weekToggle,body=root.querySelector(`[data-week-body="${w}"]`);body.classList.toggle('open');btn.querySelector('i').textContent=body.classList.contains('open')?'−':'+'});root.querySelectorAll('[data-open-session]').forEach(btn=>btn.onclick=()=>{const [w,s]=btn.dataset.openSession.split('|').map(Number);openSession(track,w,s)});
 }
 function hook(){const nav=document.querySelector('[data-screen="exercise"]');if(nav&&!nav.dataset.seqHook){nav.dataset.seqHook='1';nav.addEventListener('click',()=>setTimeout(renderSequence,0))}renderSequence()}
