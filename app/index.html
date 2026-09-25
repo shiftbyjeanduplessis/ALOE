@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173f2e">
+  <title>Alcare Aloe — Agent Ordering</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <a href="../" class="brand"><img src="../assets/alcare-logo.png" alt="Alcare Aloe"></a>
+      <span class="kicker">Agent ordering system</span>
+      <h1>Order stock. Pay. Done.</h1>
+      <p class="lead">A working prototype of Alcare Aloe’s reseller ordering and office fulfilment flow.</p>
+      <div class="demo-note"><strong>Prototype:</strong> demo data is stored in this browser. PayFast is simulated until the live merchant account is connected.</div>
+      <div class="login-grid">
+        <button class="role-card" data-login="agent">
+          <span class="role-icon">A</span>
+          <span><strong>Agent demo</strong><small>Browse products, build stock orders and view order history.</small></span>
+        </button>
+        <button class="role-card" data-login="admin">
+          <span class="role-icon">O</span>
+          <span><strong>Alcare office demo</strong><small>Manage orders, catalogue, agents and sales intelligence.</small></span>
+        </button>
+      </div>
+      <a class="text-link" href="../">← Back to proposal</a>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+      <a href="../" class="top-logo"><img src="../assets/alcare-logo.png" alt="Alcare Aloe"></a>
+      <div class="top-actions">
+        <span class="prototype-pill">Prototype</span>
+        <button id="cartButton" class="cart-button hidden">Cart <span id="cartCount">0</span></button>
+        <button id="userButton" class="user-button">JD</button>
+      </div>
+    </header>
+
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-user">
+        <span id="sidebarRole">Agent</span>
+        <strong id="sidebarName">Demo Agent</strong>
+        <small id="sidebarMeta">George, Western Cape</small>
+      </div>
+      <nav id="nav"></nav>
+      <div class="sidebar-bottom">
+        <button id="resetDemo" class="ghost-btn">Reset demo data</button>
+        <button id="logoutBtn" class="ghost-btn">Sign out</button>
+      </div>
+    </aside>
+
+    <main id="mainContent" class="main-content"></main>
+  </div>
+
+  <div id="drawerBackdrop" class="backdrop hidden"></div>
+  <aside id="cartDrawer" class="cart-drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div><span class="kicker">Stock order</span><h2>Your cart</h2></div>
+      <button id="closeCart" class="icon-btn">×</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-footer">
+      <div class="total-row"><span>Total</span><strong id="cartTotal">R0.00</strong></div>
+      <button id="checkoutBtn" class="primary-btn">Review order</button>
+    </div>
+  </aside>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div id="modalCard" class="modal-card"></div>
+  </div>
+
+  <script src="app-core.js"></script>
+  <script src="app-views.js"></script>
+</body>
+</html>
