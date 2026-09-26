@@ -110,6 +110,45 @@ function installQaPersistence(){
   },0);
 }
 
+function installCohortSwitcher(){
+  const progress=document.getElementById('progress');
+  if(!progress) return;
+
+  function add(){
+    if(!document.getElementById('pwCohortSwitch')) {
+      const cohortCard=[...progress.querySelectorAll('.card')].find(c=>(c.textContent||'').includes('Assigned start date'));
+      if(!cohortCard) return;
+      const wrap=document.createElement('div');
+      wrap.id='pwCohortSwitch';
+      wrap.style.marginTop='14px';
+      wrap.style.paddingTop='14px';
+      wrap.style.borderTop='1px solid rgba(7,85,104,.15)';
+      wrap.innerHTML='<div class="sub" style="margin-bottom:7px;font-weight:800">Wrong start date?</div><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><select id="pwCohortSelect" style="flex:1;min-width:160px;padding:11px 12px;border:1px solid #b9dfe3;border-radius:10px;background:#fff;color:#075568;font-weight:800"><option value="2026-09-14">14 September</option><option value="2026-09-28">28 September</option></select><button class="btn ghost small" id="pwCohortSave" type="button">CHANGE START DATE</button></div><div class="sub" style="margin-top:7px">Use this only if you chose the wrong intake date.</div>';
+      cohortCard.appendChild(wrap);
+      const select=wrap.querySelector('#pwCohortSelect');
+      const button=wrap.querySelector('#pwCohortSave');
+      select.value=S.cohort;
+      button.onclick=()=>{
+        const next=select.value;
+        if(next===S.cohort){toast('Start date is already correct');return}
+        const label=next==='2026-09-28'?'28 September':'14 September';
+        if(!confirm('Change your challenge start date to '+label+'? Your Week and Day will be recalculated.')){select.value=S.cohort;return}
+        S.cohort=next;
+        save();
+        renderAll();
+        setTimeout(()=>{show('progress');toast('Start date changed to '+label)},0);
+      };
+    } else {
+      const select=document.getElementById('pwCohortSelect');
+      if(select) select.value=S.cohort;
+    }
+  }
+
+  new MutationObserver(add).observe(progress,{subtree:true,childList:true});
+  add();
+}
+
 observeUi();
 installQaPersistence();
+installCohortSwitcher();
 })();
