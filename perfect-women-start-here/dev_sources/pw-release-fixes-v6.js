@@ -110,6 +110,48 @@ function installQaPersistence(){
   },0);
 }
 
+function installFreshCohortGate(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('qa')==='1') return;
+
+  function savedCohort(){
+    try{
+      const current=JSON.parse(localStorage.getItem('pw8v4')||'null');
+      if(current && ['2026-09-14','2026-09-28'].includes(current.cohort)) return current.cohort;
+    }catch(e){}
+    try{
+      const legacy=JSON.parse(localStorage.getItem('pw8')||'null');
+      if(legacy && ['2026-09-14','2026-09-28'].includes(legacy.cohort)) return legacy.cohort;
+    }catch(e){}
+    return '';
+  }
+
+  if(savedCohort()) return;
+  if(['2026-09-14','2026-09-28'].includes(params.get('cohort'))) return;
+  if(document.getElementById('pwFreshCohortGate')) return;
+
+  const gate=document.createElement('div');
+  gate.id='pwFreshCohortGate';
+  gate.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(255,250,240,.98);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#075568';
+  gate.innerHTML='<div style="width:min(430px,100%);background:#fff;border:2px solid #9bdee4;border-radius:22px;padding:24px;box-shadow:0 18px 50px rgba(7,86,104,.18);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#08a8b5;text-transform:uppercase">Perfect Women</div><h1 style="font-size:30px;line-height:1.05;margin:10px 0 8px;color:#075568">When does your challenge start?</h1><p style="font-size:16px;line-height:1.45;margin:0 0 20px;color:#476d73">Choose your intake date once. Your Week and Day will then update automatically.</p><div style="display:grid;gap:12px"><button type="button" data-cohort-choice="2026-09-14" style="border:0;border-radius:14px;padding:16px;background:#08a8b5;color:#fff;font-size:18px;font-weight:900;cursor:pointer">14 September</button><button type="button" data-cohort-choice="2026-09-28" style="border:0;border-radius:14px;padding:16px;background:#ff5960;color:#fff;font-size:18px;font-weight:900;cursor:pointer">28 September</button></div><p style="font-size:13px;line-height:1.4;margin:16px 0 0;color:#6b8589">Not sure? Check the start date you were given before choosing.</p></div>';
+  document.body.appendChild(gate);
+  document.documentElement.style.overflow='hidden';
+  document.body.style.overflow='hidden';
+
+  gate.querySelectorAll('[data-cohort-choice]').forEach(button=>{
+    button.onclick=()=>{
+      const next=button.getAttribute('data-cohort-choice');
+      S.cohort=next;
+      save();
+      gate.remove();
+      document.documentElement.style.overflow='';
+      document.body.style.overflow='';
+      renderAll();
+      toast('Start date saved');
+    };
+  });
+}
+
 function installCohortSwitcher(){
   const progress=document.getElementById('progress');
   if(!progress) return;
@@ -150,5 +192,6 @@ function installCohortSwitcher(){
 
 observeUi();
 installQaPersistence();
+installFreshCohortGate();
 installCohortSwitcher();
 })();
