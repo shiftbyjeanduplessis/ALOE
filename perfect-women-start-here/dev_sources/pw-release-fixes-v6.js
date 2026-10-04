@@ -117,23 +117,23 @@ function installFreshCohortGate(){
   function savedCohort(){
     try{
       const current=JSON.parse(localStorage.getItem('pw8v4')||'null');
-      if(current && ['2026-09-14','2026-09-28'].includes(current.cohort)) return current.cohort;
+      if(current && ['2026-09-14','2026-09-28','2026-10-05'].includes(current.cohort)) return current.cohort;
     }catch(e){}
     try{
       const legacy=JSON.parse(localStorage.getItem('pw8')||'null');
-      if(legacy && ['2026-09-14','2026-09-28'].includes(legacy.cohort)) return legacy.cohort;
+      if(legacy && ['2026-09-14','2026-09-28','2026-10-05'].includes(legacy.cohort)) return legacy.cohort;
     }catch(e){}
     return '';
   }
 
   if(savedCohort()) return;
-  if(['2026-09-14','2026-09-28'].includes(params.get('cohort'))) return;
+  if(['2026-09-14','2026-09-28','2026-10-05'].includes(params.get('cohort'))) return;
   if(document.getElementById('pwFreshCohortGate')) return;
 
   const gate=document.createElement('div');
   gate.id='pwFreshCohortGate';
   gate.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(255,250,240,.98);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#075568';
-  gate.innerHTML='<div style="width:min(430px,100%);background:#fff;border:2px solid #9bdee4;border-radius:22px;padding:24px;box-shadow:0 18px 50px rgba(7,86,104,.18);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#08a8b5;text-transform:uppercase">Perfect Women</div><h1 style="font-size:30px;line-height:1.05;margin:10px 0 8px;color:#075568">When does your challenge start?</h1><p style="font-size:16px;line-height:1.45;margin:0 0 20px;color:#476d73">Choose your intake date once. Your Week and Day will then update automatically.</p><div style="display:grid;gap:12px"><button type="button" data-cohort-choice="2026-09-14" style="border:0;border-radius:14px;padding:16px;background:#08a8b5;color:#fff;font-size:18px;font-weight:900;cursor:pointer">14 September</button><button type="button" data-cohort-choice="2026-09-28" style="border:0;border-radius:14px;padding:16px;background:#ff5960;color:#fff;font-size:18px;font-weight:900;cursor:pointer">28 September</button></div><p style="font-size:13px;line-height:1.4;margin:16px 0 0;color:#6b8589">Not sure? Check the start date you were given before choosing.</p></div>';
+  gate.innerHTML='<div style="width:min(430px,100%);background:#fff;border:2px solid #9bdee4;border-radius:22px;padding:24px;box-shadow:0 18px 50px rgba(7,86,104,.18);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#08a8b5;text-transform:uppercase">Perfect Women</div><h1 style="font-size:30px;line-height:1.05;margin:10px 0 8px;color:#075568">When does your challenge start?</h1><p style="font-size:16px;line-height:1.45;margin:0 0 20px;color:#476d73">Choose your intake date once. Your Week and Day will then update automatically.</p><div style="display:grid;gap:12px"><button type="button" data-cohort-choice="2026-09-14" style="border:0;border-radius:14px;padding:16px;background:#08a8b5;color:#fff;font-size:18px;font-weight:900;cursor:pointer">14 September</button><button type="button" data-cohort-choice="2026-09-28" style="border:0;border-radius:14px;padding:16px;background:#ff5960;color:#fff;font-size:18px;font-weight:900;cursor:pointer">28 September</button><button type="button" data-cohort-choice="2026-10-05" style="border:0;border-radius:14px;padding:16px;background:#075568;color:#fff;font-size:18px;font-weight:900;cursor:pointer">5 October</button></div><p style="font-size:13px;line-height:1.4;margin:16px 0 0;color:#6b8589">Not sure? Check the start date you were given before choosing.</p></div>';
   document.body.appendChild(gate);
   document.documentElement.style.overflow='hidden';
   document.body.style.overflow='hidden';
@@ -165,7 +165,7 @@ function installCohortSwitcher(){
       wrap.style.marginTop='14px';
       wrap.style.paddingTop='14px';
       wrap.style.borderTop='1px solid rgba(7,85,104,.15)';
-      wrap.innerHTML='<div class="sub" style="margin-bottom:7px;font-weight:800">Wrong start date?</div><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><select id="pwCohortSelect" style="flex:1;min-width:160px;padding:11px 12px;border:1px solid #b9dfe3;border-radius:10px;background:#fff;color:#075568;font-weight:800"><option value="2026-09-14">14 September</option><option value="2026-09-28">28 September</option></select><button class="btn ghost small" id="pwCohortSave" type="button">CHANGE START DATE</button></div><div class="sub" style="margin-top:7px">Use this only if you chose the wrong intake date.</div>';
+      wrap.innerHTML='<div class="sub" style="margin-bottom:7px;font-weight:800">Wrong start date?</div><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><select id="pwCohortSelect" style="flex:1;min-width:160px;padding:11px 12px;border:1px solid #b9dfe3;border-radius:10px;background:#fff;color:#075568;font-weight:800"><option value="2026-09-14">14 September</option><option value="2026-09-28">28 September</option><option value="2026-10-05">5 October</option></select><button class="btn ghost small" id="pwCohortSave" type="button">CHANGE START DATE</button></div><div class="sub" style="margin-top:7px">Use this only if you chose the wrong intake date.</div>';
       cohortCard.appendChild(wrap);
       const select=wrap.querySelector('#pwCohortSelect');
       const button=wrap.querySelector('#pwCohortSave');
@@ -173,7 +173,7 @@ function installCohortSwitcher(){
       button.onclick=()=>{
         const next=select.value;
         if(next===S.cohort){toast('Start date is already correct');return}
-        const label=next==='2026-09-28'?'28 September':'14 September';
+        const label=next==='2026-10-05'?'5 October':(next==='2026-09-28'?'28 September':'14 September');
         if(!confirm('Change your challenge start date to '+label+'? Your Week and Day will be recalculated.')){select.value=S.cohort;return}
         S.cohort=next;
         save();
